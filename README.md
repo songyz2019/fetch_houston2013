@@ -33,4 +33,4 @@ Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459
 paperswithcode: https://paperswithcode.com/dataset/houston
 
 ## License
-GPL-3.0-only
+Apache-2.0
