@@ -4,6 +4,7 @@ from os.path import exists, expanduser, join
 from zipfile import ZipFile
 from pathlib import Path
 import urllib
+import urllib.request
 import warnings
 from io import StringIO
 from typing import List
