@@ -42,10 +42,11 @@ We download dataset from official website and pastbin.com.
 
 ## TODO(Maybe)
 Replace scikit-image with imageio
+Publish to pypi or provide whl
 
 ## Credits
-Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459
-paperswithcode: https://paperswithcode.com/dataset/houston
+Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459  
+paperswithcode: https://paperswithcode.com/dataset/houston  
 
 ## License
 Apache-2.0
