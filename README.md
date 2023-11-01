@@ -1,4 +1,4 @@
-[English](./README.md) | [中文(简体)](./README.zh-hans.md)
+**English** | [中文(简体)](./README.zh-hans.md)
 
 # fetch_houston2013
 Download and load Houston 2013 Dataset like a buildin function in scikit-learn.
