@@ -1,7 +1,7 @@
 **English** | [中文(简体)](./README.zh-hans.md)
 
 # fetch_houston2013
-Download and load Houston 2013 Dataset like a buildin function in scikit-learn.
+Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) like a buildin function in scikit-learn.
 
 - Automaticlly download all needed files
 - Support caching
