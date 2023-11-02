@@ -88,7 +88,10 @@ def read_roi_txt_as_list(path :Path) -> List[NDArray]:
                     result.append(data)
             else:
                 buf += line
-
+        data=np.loadtxt(StringIO(buf), usecols=(2, 1), comments=';', dtype='uint')
+        buf = ""
+        if data.size > 0:
+            result.append(data)
     warnings.resetwarnings()
     return result
 
