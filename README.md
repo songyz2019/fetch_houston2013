@@ -47,6 +47,7 @@ Publish to pypi or provide whl
 ## Credits
 Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459  
 paperswithcode: https://paperswithcode.com/dataset/houston  
+The 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt in this repo is exported from original 2013_IEEE_GRSS_DF_Contest_Samples_VA.roi.
 
 ## License
 Apache-2.0
