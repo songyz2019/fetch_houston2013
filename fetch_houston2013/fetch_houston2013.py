@@ -50,6 +50,11 @@ def read_roi_txt(path :Path, shape) -> List[NDArray]: # TODO: 性能问题
             else:
                 buf += line
 
+        data=np.loadtxt(StringIO(buf), usecols=(2, 1), comments=';', dtype='uint')
+        buf = ""
+        if data.size > 0:
+            result.append(data)
+
     m = np.zeros(shape, dtype='uint8')
     for id,indices in enumerate(result):
         for i in indices:
