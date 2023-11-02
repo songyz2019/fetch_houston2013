@@ -8,6 +8,7 @@ import urllib.request
 import warnings
 from io import StringIO
 from typing import List
+import logging
 
 import numpy as np
 from numpy.typing import NDArray
@@ -65,19 +66,6 @@ def get_data_home(data_home=None) -> str:
     return data_home
 
 
-def sha256(path):
-    """Calculate the sha256 hash of the file at path."""
-    sha256hash = hashlib.sha256()
-    chunk_size = 8192
-    with open(path, "rb") as f:
-        while True:
-            buffer = f.read(chunk_size)
-            if not buffer:
-                break
-            sha256hash.update(buffer)
-    return sha256hash.hexdigest()
-
-
 def read_roi_txt_as_list(path :Path) -> List[NDArray]:
     """
     读取ENVI软件导出roi文件得到的txt文件,得到一个 *List*
@@ -105,13 +93,27 @@ def read_roi_txt_as_list(path :Path) -> List[NDArray]:
     return result
 
 
-def verify_files(root: Path, files_sha256: dict) -> bool:
+def verify_files(root: Path, files_sha256: dict, extra_message: str = '') -> None:
     """验证root下的文件的sha256是否与files_sha256相符
 
     :param files_sha256: 例如: `{"1.txt", "f4d619....", "2.txt": "9d03010....."}`
     :param root: 文件夹目录
     """
-    return all([sha256(root / filename) == checksum for filename, checksum in files_sha256.items()])
+
+    def sha256(path):
+        """Calculate the sha256 hash of the file at path."""
+        sha256hash = hashlib.sha256()
+        chunk_size = 8192
+        with open(path, "rb") as f:
+            while True:
+                buffer = f.read(chunk_size)
+                if not buffer:
+                    break
+                sha256hash.update(buffer)
+        return sha256hash.hexdigest()
+
+    for filename, checksum in files_sha256.items():
+        assert sha256(root/filename) == checksum, f"Incorrect SHA256 for {filename}. Expect {checksum}, Actual {sha256(root/filename)}. {extra_message}"
 
 
 def fetch_houston2013(datahome=None, download_if_missing=True):
@@ -123,6 +125,7 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
     :return train_truth,test_truth 训练集真值和测试集真值, train_truth[i][j] 代表第i类的第j个像素坐标
     :return label_dict 编号->标签名
     """
+    logger = logging.getLogger("fetch_houston2013")
 
     def fetch_houston2013zip(path: Path, download_if_missing: bool = True) -> Path:
         """Make sure `path` is the zip file of Houston2013, or raise FileNotFoundError
@@ -133,13 +136,12 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
                 opener = urllib.request.build_opener()
                 opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36')]
                 urllib.request.install_opener(opener)
-                print(f"Downloading {url}")
+                logger.info(f"Downloading {url}")
                 urllib.request.urlretrieve(url, path)
             else:
                 raise FileNotFoundError(f"{path} not found")
-        else:
-            print(f"{path} already exists")
-        assert sha256(path) == "f4d619d5cbcb09d0301038f1b8fe83def6c2d484334b7b8127740a00ecf7e245"
+
+        verify_files(path.parent, {path.name: "f4d619d5cbcb09d0301038f1b8fe83def6c2d484334b7b8127740a00ecf7e245"})
         return path
 
     # 1. 准备数据
@@ -163,19 +165,27 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
 
     # 2.下载数据集zip文件并解压
     if exists(FILES_PATH) and len(os.listdir(FILES_PATH)) > 0:  # 已存在解压的文件夹且非空
-        assert verify_files(FILES_PATH,FILES_SHA256), f"数据集文件夹{FILES_PATH}已存在,但未通过哈希验证!请考虑删除文件或更改data_home参数"
+        verify_files(FILES_PATH,FILES_SHA256,f"请尝试清空{FILES_PATH}")
     else:
         fetch_houston2013zip(ZIP_PATH, download_if_missing)
         # 解压 2013_DFTC 目录下的所有文件
+        logger.info(f"Decompressing {ZIP_PATH}")
         with ZipFile(ZIP_PATH, 'r') as zip_file:
             zip_file.extractall(UNZIPED_PATH)
         
         if not exists(FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt'):
+            logger.info(f"Downloading 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt")
             urllib.request.urlretrieve("https://pastebin.com/raw/FJyu5SQX", FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
+            # Mirror: urllib.request.urlretrieve("https://github.com/songyz2019/fetch_houston2013/raw/main/data/2013_IEEE_GRSS_DF_Contest_Samples_VA.txt", FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
+        verify_files(FILES_PATH, FILES_SHA256)
 
-        assert verify_files(FILES_PATH, FILES_SHA256), f"解压后的数据未通过哈希验证(可能是2013_IEEE_GRSS_DF_Contest_Samples_VA.txt下载失败)"
+        # 删除ZIP
+        os.remove(ZIP_PATH)
+
+        # 显示版权信息
         with open(FILES_PATH / 'copyright.txt', 'r', encoding='iso-8859-1') as f:
-            print(f.read())
+            logger.info(f.read())
+
 
     # 3. 数据加载
     lidar :NDArray = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_LiDAR.tif')[np.newaxis, :, :] # (1   349 1905)
@@ -244,6 +254,5 @@ class Houston2013(Dataset):
         (i,j),claz = get_nth_in_sublist(self.truth, index)
         y = np.eye(self.num_class)[claz-self.exclude_ground] # OneHot
         return self.casi[i,j], self.lidar[i,j], self.casi_pixels[i,j], y
-
 
 __all__ = ['Houston2013','fetch_houston2013']
