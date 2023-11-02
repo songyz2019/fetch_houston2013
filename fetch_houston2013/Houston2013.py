@@ -174,7 +174,7 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
             urllib.request.urlretrieve("https://pastebin.com/raw/FJyu5SQX", FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
 
         assert verify_files(FILES_PATH, FILES_SHA256), f"解压后的数据未通过哈希验证(可能是2013_IEEE_GRSS_DF_Contest_Samples_VA.txt下载失败)"
-        with open(FILES_PATH / 'copyright.txt', 'r', encoding='UTF-8') as f:
+        with open(FILES_PATH / 'copyright.txt', 'r', encoding='iso-8859-1') as f:
             print(f.read())
 
     # 3. 数据加载
