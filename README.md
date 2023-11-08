@@ -9,6 +9,7 @@ Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) like
 - Show copyright of the dataset
 - numpy format
 - PyTorch support
+- Need more testing before GA
 
 ![screenshot](screenshot.png)
 
