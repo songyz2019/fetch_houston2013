@@ -1,64 +1,23 @@
-import hashlib
 import os
 from os.path import exists, expanduser, join
-from zipfile import ZipFile
 from pathlib import Path
+import warnings
+import hashlib
+from zipfile import ZipFile
 import urllib
 import urllib.request
-import warnings
 from io import StringIO
-from typing import List
 import logging
 
 import numpy as np
 from numpy.typing import NDArray
 
 import skimage
-
 from torch.utils.data import Dataset
+from scipy.sparse import coo_array
 
 
-def get_nth_in_sublist(l: List[List], n: int):
-    """返回一个List[List[]]中绝对的第N个元素
-
-    例如: get_nth_in_sublist([[],[1,2,3],[4,5]], 4) 会 返回 3
-    """
-    j = n
-    length_list = enumerate([len(c) for c in l])
-    for i, length in length_list:
-        if j < length:
-            return l[i][j], i
-        else:
-            j -= length
-    raise IndexError(f"index out of range {n}/{sum(length_list)}")
-
-
-def get_data_home(data_home=None) -> str:
-    """Return the path of the scikit-learn data directory.
-
-    This folder is used by some large dataset loaders to avoid downloading the
-    data several times.
-
-    By default, the data directory is set to a folder named 'scikit_learn_data' in the
-    user home folder.
-
-    Alternatively, it can be set by the 'SCIKIT_LEARN_DATA' environment
-    variable or programmatically by giving an explicit folder path. The '~'
-    symbol is expanded to the user home folder.
-
-    If the folder does not already exist, it is automatically created.
-
-    Parameters
-    ----------
-    data_home : str, default=None
-        The path to scikit-learn data directory. If `None`, the default path
-        is `~/sklearn_learn_data`.
-
-    Returns
-    -------
-    data_home: str
-        The path to scikit-learn data directory.
-    """
+def _get_data_home(data_home=None) -> str:
     if data_home is None:
         data_home = os.environ.get("SCIKIT_LEARN_DATA", join("~", "scikit_learn_data"))
     data_home = expanduser(data_home)
@@ -66,39 +25,47 @@ def get_data_home(data_home=None) -> str:
     return data_home
 
 
-def read_roi_txt_as_list(path :Path) -> List[NDArray]:
+def _read_roi(path :Path, shape) -> coo_array:
     """
-    读取ENVI软件导出roi文件得到的txt文件,得到一个 *List*
+    读取ENVI软件导出roi文件得到的txt文件,得到一个稀疏矩阵图像
 
     用起来像字典
 
     :param path: 文件路径
-    :return: 示例 [NotImplemented, [(1,2),(3,4),(5,6)], [(7,8)], [(9,10)] ], 表示第一类(比如健康草地)有如下像素点(1,2),(3,4),(5,6), 第二类(干草地)有如下像素点(7,8)。第0个元素是地面,不应该使用它
+    :return: An coo_matrix image representing the ROI
     """
     warnings.simplefilter("ignore", category=UserWarning) # Supress loadtxt's warning when data is empty
 
-    result = [[],] # 不应该访问第0个元素,它是地面
+    img = coo_array(shape, dtype='uint')
     buf = ""
+    cid = 1
     with open(path, 'r') as f:
-        for line in f.readlines():
-            if line == os.linesep:
+        while True:
+            line = f.readline()
+            if line == os.linesep or line == "":
                 data=np.loadtxt(StringIO(buf), usecols=(2, 1), comments=';', dtype='uint')
                 buf = ""
                 if data.size > 0:
-                    result.append(data)
+                    rows,cols = data.T
+                    vals = cid*np.ones_like(rows)
+                    cid += 1
+                    img += coo_array((vals,(rows,cols)), shape=shape)
+                    img.data[img.data>cid] = 0  # 清除重复像素点
             else:
                 buf += line
-        data=np.loadtxt(StringIO(buf), usecols=(2, 1), comments=';', dtype='uint')
-        buf = ""
-        if data.size > 0:
-            result.append(data)
+
+            if line == "":
+                break
+
     warnings.resetwarnings()
-    return result
+
+    return img.tocoo()
 
 
-def verify_files(root: Path, files_sha256: dict, extra_message: str = '') -> None:
+def _verify_files(root: Path, files_sha256: dict, extra_message: str = '') -> None:
     """验证root下的文件的sha256是否与files_sha256相符
 
+    :param extra_message: 额外报错信息
     :param files_sha256: 例如: `{"1.txt", "f4d619....", "2.txt": "9d03010....."}`
     :param root: 文件夹目录
     """
@@ -119,14 +86,14 @@ def verify_files(root: Path, files_sha256: dict, extra_message: str = '') -> Non
         assert sha256(root/filename) == checksum, f"Incorrect SHA256 for {filename}. Expect {checksum}, Actual {sha256(root/filename)}. {extra_message}"
 
 
-def fetch_houston2013(datahome=None, download_if_missing=True):
+def fetch_houston2013(datahome=None, download_if_missing=True, truth_format='image'):
     """Load the Houston2013 data-set in scikit-learn style
 
     Download it if necessary.
 
-    :return casi, lidar, train_y, test_y 高光谱图像(144x349x1905), 激光雷达图像(1x349x1905)
-    :return train_truth,test_truth 训练集真值和测试集真值, train_truth[i][j] 代表第i类的第j个像素坐标
-    :return label_dict 编号->标签名
+    :return casi, lidar 高光谱图像(144x349x1905), 激光雷达图像(1x349x1905)
+    :return train_truth,test_truth 训练集真值和测试集真值, a 349x1905 coo_array
+    :return info 相关信息
     """
     logger = logging.getLogger("fetch_houston2013")
 
@@ -144,14 +111,14 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
             else:
                 raise FileNotFoundError(f"{path} not found")
 
-        verify_files(path.parent, {path.name: "f4d619d5cbcb09d0301038f1b8fe83def6c2d484334b7b8127740a00ecf7e245"})
+        _verify_files(path.parent, {path.name: "f4d619d5cbcb09d0301038f1b8fe83def6c2d484334b7b8127740a00ecf7e245"})
         return path
 
     # 1. 准备数据
-    DATA_HOME = Path(get_data_home(datahome))
+    DATA_HOME = Path(_get_data_home(datahome))
     ZIP_PATH = DATA_HOME / 'Houston2013.zip'
-    UNZIPED_PATH = DATA_HOME / 'Houston2013/' # 解压到
-    FILES_PATH = UNZIPED_PATH/'2013_DFTC' # 文件根目录
+    UNZIPED_PATH = DATA_HOME / 'Houston2013/'
+    FILES_PATH = UNZIPED_PATH/'2013_DFTC'
     FILES_SHA256 = {
         "2013_IEEE_GRSS_DF_Contest_CASI.hdr": "869be3459978b535b873bca98b1cf05066c7acca9c160b486a86efd775005e8d",
         "2013_IEEE_GRSS_DF_Contest_CASI.tif": "1440f38594e8e82cc1944c084fc138ef55a70af54122828e999c4fb438574c14",
@@ -168,7 +135,7 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
 
     # 2.下载数据集zip文件并解压
     if exists(FILES_PATH) and len(os.listdir(FILES_PATH)) > 0:  # 已存在解压的文件夹且非空
-        verify_files(FILES_PATH,FILES_SHA256,f"请尝试清空{FILES_PATH}")
+        _verify_files(FILES_PATH, FILES_SHA256, f"please try removing {FILES_PATH}")
     else:
         fetch_houston2013zip(ZIP_PATH, download_if_missing)
         # 解压 2013_DFTC 目录下的所有文件
@@ -180,7 +147,7 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
             logger.info(f"Downloading 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt")
             urllib.request.urlretrieve("https://pastebin.com/raw/FJyu5SQX", FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
             # Mirror: urllib.request.urlretrieve("https://github.com/songyz2019/fetch_houston2013/raw/main/data/2013_IEEE_GRSS_DF_Contest_Samples_VA.txt", FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
-        verify_files(FILES_PATH, FILES_SHA256)
+        _verify_files(FILES_PATH, FILES_SHA256)
 
         # 删除ZIP
         os.remove(ZIP_PATH)
@@ -193,28 +160,35 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
     # 3. 数据加载
     lidar :NDArray = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_LiDAR.tif')[np.newaxis, :, :] # (1   349 1905)
     casi  :NDArray = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_CASI.tif' ).transpose(2,0,1)  # (144 349 1905)
-    train_truth:List= read_roi_txt_as_list(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_TR.txt') # A List of locations for each class, for example: [ [(1,2),(3,4),(5,6)], [(7,8)], [(9,10)] ]
-    test_truth :List= read_roi_txt_as_list(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_VA.txt') # A List of locations for each class
-    label_dict = {
-        0 : 'Ground',
-        1 : 'Healthy grass',
-        2 : 'Stressed grass',
-        3 : 'Synthetic grass',
-        4 : 'Trees',
-        5 : 'Soil',
-        6 : 'Water',
-        7 : 'Residential',
-        8 : 'Commercial',
-        9 : 'Road',
-        10: 'Highway',
-        11: 'Railway',
-        12: 'Parking Lot 1',
-        13: 'Parking Lot 2',
-        14: 'Tennis Court',
-        15: 'Running Track'
+    train_truth:coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_TR.txt', (349, 1905)) # (349 1905)
+    test_truth :coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_VA.txt', (349, 1905)) # (349 1905)
+
+    info = {
+        'n_band_casi': 144,
+        'n_band_lidar': 1,
+        'width': 1905,
+        'height': 349,
+        'label_dict': {
+            1 : 'Healthy grass',
+            2 : 'Stressed grass',
+            3 : 'Synthetic grass',
+            4 : 'Trees',
+            5 : 'Soil',
+            6 : 'Water',
+            7 : 'Residential',
+            8 : 'Commercial',
+            9 : 'Road',
+            10: 'Highway',
+            11: 'Railway',
+            12: 'Parking Lot 1',
+            13: 'Parking Lot 2',
+            14: 'Tennis Court',
+            15: 'Running Track'
+        }
     }
 
-    return casi, lidar, train_truth, test_truth, label_dict
+    return casi, lidar, train_truth, test_truth, info
+
 
 
 class Houston2013(Dataset):
@@ -223,11 +197,8 @@ class Houston2013(Dataset):
     """
     def preprocess(self):
         # 归一化
-        self.casi = skimage.exposure.rescale_intensity( self.casi, out_range='float32')  # 默认[0,1]
+        self.casi  = skimage.exposure.rescale_intensity( self.casi, out_range='float32')  # 默认[0,1]
         self.lidar = skimage.exposure.rescale_intensity(self.lidar, out_range='float32')  # 默认[0,1]
-
-        # 获得casi_pixels
-        self.casi_pixels = skimage.util.view_as_windows(self.casi, window_shape=(144, 1, 1)).squeeze(0)  # (349, 1905, 144, 1, 1)
 
         # 填充
         pad_width = (self.patch_size - 1) // 2
@@ -235,27 +206,31 @@ class Houston2013(Dataset):
         self.lidar = np.pad(self.lidar, ((0, 0), (pad_width, pad_width), (pad_width, pad_width)), 'symmetric')
 
         # 切片
-        self.lidar = skimage.util.view_as_windows(self.lidar, window_shape=(1,   self.patch_size, self.patch_size)).squeeze(0)  # (349, 1905, 1,   7, 7)
-        self.casi =  skimage.util.view_as_windows(self.casi,  window_shape=(144, self.patch_size, self.patch_size)).squeeze(0)  # (349, 1905, 144, 7, 7)
+        self.lidar = skimage.util.view_as_windows(self.lidar, window_shape=(self.n_lidar_band, self.patch_size, self.patch_size)).squeeze(0)  # (349, 1905, 1,   7, 7)
+        self.casi =  skimage.util.view_as_windows(self.casi,  window_shape=(self.n_casi_band,  self.patch_size, self.patch_size)).squeeze(0)  # (349, 1905, 144, 7, 7)
 
-    def __init__(self, root :Path = None, train=True, download=True, patch_size=7, exclude_ground=True):
+    def __init__(self, root :Path = None, train=True, download=True, patch_size=7):
         self.patch_size = patch_size
         self.train = train
-        self.exclude_ground = exclude_ground
 
-        self.casi, self.lidar, self.train_truth, self.test_truth, self.label_dict = fetch_houston2013(root, download)
+        self.casi, self.lidar, self.train_truth, self.test_truth, self.label_dict = fetch_houston2013(root, download, truth_format='list')
 
         self.truth = self.train_truth if self.train else self.test_truth
-        self.num_class = len(self.label_dict) - self.exclude_ground
+        self.n_class = len(self.label_dict)
+        self.n_casi_band = self.casi.shape[0]
+        self.n_lidar_band = self.lidar.shape[0]
 
         self.preprocess()
 
     def __len__(self):
-        return sum([ sum([len(c) for c in self.truth]) ])
+        return self.truth.count_nonzero()
 
     def __getitem__(self, index):
-        (i,j),claz = get_nth_in_sublist(self.truth, index)
-        y = np.eye(self.num_class)[claz-self.exclude_ground] # OneHot
-        return self.casi[i,j], self.lidar[i,j], self.casi_pixels[i,j], y
+        i   = self.truth.row[index]
+        j   = self.truth.col[index]
+        cid = self.truth.data[index]
+        y = np.eye(self.n_class)[cid] # OneHot
+        return self.casi[i,j], self.lidar[i,j], y
 
-__all__ = ['Houston2013','fetch_houston2013']
+
+__all__ = ['Houston2013', 'fetch_houston2013']
