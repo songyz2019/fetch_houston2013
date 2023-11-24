@@ -49,7 +49,7 @@ testset  = DataLoader(Houston2013(train=False, patch_size=7))
 ```
 ## Troubleshooting
 Remove `~/scikit_learn_data` to clean cache and try again.  
-We download dataset from official website and pastbin.com.  
+We download dataset from official website and pastbin.com. Make sure you can access these websites.
 
 ## Benchmark
 
