@@ -25,6 +25,7 @@ Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) like
 1. Install scikit-image
 ```bash
 pip install scikit-image==0.22.0
+pip install scipy
 ```
 2. copy [fetch_houston2013.py](fetch_houston2013/fetch_houston2013.py) to your project
 3. import and run
