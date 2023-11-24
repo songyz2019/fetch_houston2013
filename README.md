@@ -9,7 +9,8 @@ Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) like
 - Show copyright of the dataset
 - numpy format
 - PyTorch support
-- Use sparse matrix to representing ground truth
+- Use sparse matrix to representing ground truth, less memory usage and easier iteration
+- Faster loading than `.mat`
 - Need more testing before GA
 
 ![screenshot](screenshot.png)
@@ -41,6 +42,28 @@ testset  = DataLoader(Houston2013(train=False, patch_size=7))
 ## Troubleshooting
 Remove `~/scikit_learn_data` to clean cache and try again.  
 We download dataset from official website and pastbin.com.  
+
+## Benchmark
+
+```python
+In [4]: from util.houton2013 import fetch_houston2013
+   ...: from time import time
+   ...: start_time = time()
+   ...: fetch_houston2013()
+   ...: print("fetch_houston2013 %.4f ms"  % (1000*(time() - start_time)))
+
+fetch_houston2013 521.4026 ms
+
+In [5]: from scipy.io import loadmat
+   ...: start_time = time()
+   ...: loadmat(os.path.expanduser('~/dataset/Houston2013/HSI.mat'))['HSI']
+   ...: loadmat(os.path.expanduser('~/dataset/Houston2013/DSM.mat'))['DSM']
+   ...: loadmat(os.path.expanduser('~/dataset/Houston2013/TR.mat'))['TR_map']
+   ...: loadmat(os.path.expanduser('~/dataset/Houston2013/TE.mat'))['TE_map']
+   ...: print("loadmat Time %.4f ms" % (1000*(time() - start_time)))
+
+loadmat Time 979.6755 ms
+```
 
 ## TODO(Maybe)
 Replace scikit-image with imageio
