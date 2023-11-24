@@ -38,6 +38,7 @@ casi, lidar, train_y, test_y, info = fetch_houston2013()
 1. Install scikit-image
 ```bash
 pip install scikit-image==0.22.0
+pip install scipy
 ```
 2. copy [Houston2013.py](houston2013/Houston2013.py) to your project
 3. import and run
@@ -51,6 +52,8 @@ Remove `~/scikit_learn_data` to clean cache and try again.
 We download dataset from official website and pastbin.com.  
 
 ## Benchmark
+
+In our simple test case, loading data is nearly 2x faster than traditional ways.
 
 ```python
 In [4]: from util.houton2013 import fetch_houston2013
@@ -71,6 +74,11 @@ In [5]: from scipy.io import loadmat
 
 loadmat Time 979.6755 ms
 ```
+
+Test environmetn: `Ubuntu 22.04 on Intel(R) Core(TM) i9-10900X`
+
+## This is totally meaningless!
+Yes, comparing to training time, improving data loading time is not notable, but it is interesting.
 
 ## TODO(Maybe)
 Replace scikit-image with imageio
