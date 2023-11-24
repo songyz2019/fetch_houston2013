@@ -31,7 +31,7 @@ pip install scipy
 3. import and run
 ```python
 from fetch_houston2013 import fetch_houston2013
-casi, lidar, train_y, test_y, num_class = fetch_houston2013()
+casi, lidar, train_y, test_y, info = fetch_houston2013()
 ```
 
 ### PyTorch
