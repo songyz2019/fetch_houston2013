@@ -7,6 +7,7 @@
 - 缓存已下载的文件
 - 验证下载文件是否正确
 - numpy格式
+- 用稀疏矩阵存储标签
 - 支持PyTorch
 
 ![screenshot](screenshot.png)
