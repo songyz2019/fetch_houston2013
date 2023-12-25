@@ -21,6 +21,9 @@ Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) like
 
 ![screenshot](screenshot.png)
 
+# fetch_muufl
+fetch_muufl dataset
+
 ## Usage
 1. Install scikit-image
 ```bash
@@ -88,6 +91,15 @@ Publish to pypi or provide whl
 Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459  
 paperswithcode: https://paperswithcode.com/dataset/houston  
 The 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt in this repo is exported from original 2013_IEEE_GRSS_DF_Contest_Samples_VA.roi.
+
+```text
+Note: If this data is used in any publication or presentation the following reference must be cited:
+P. Gader, A. Zare, R. Close, J. Aitken, G. Tuell, “MUUFL Gulfport Hyperspectral and LiDAR Airborne Data Set,” University of Florida, Gainesville, FL, Tech. Rep. REP-2013-570, Oct. 2013.
+If the scene labels are used in any publication or presentation, the following reference must be cited:
+X. Du and A. Zare, “Technical Report: Scene Label Ground Truth Map for MUUFL Gulfport Data Set,” University of Florida, Gainesville, FL, Tech. Rep. 20170417, Apr. 2017. Available: http://ufdc.ufl.edu/IR00009711/00001.
+If any of this scoring or detection code is used in any publication or presentation, the following reference must be cited:
+T. Glenn, A. Zare, P. Gader, D. Dranishnikov. (2016). Bullwinkle: Scoring Code for Sub-pixel Targets (Version 1.0) [Software]. Available from https://github.com/GatorSense/MUUFLGulfport/.
+```
 
 ## License
 Apache-2.0
