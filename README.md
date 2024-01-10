@@ -56,7 +56,7 @@ We download dataset from official website and pastbin.com. Make sure you can acc
 
 ## Benchmark
 
-In our simple test case, loading data is nearly 2x faster than traditional ways.
+In our simple test case, loading data is nearly 2x faster than traditional ways, thanks to the native code in `imageio`.
 
 ```python
 In [4]: from util.houton2013 import fetch_houston2013
