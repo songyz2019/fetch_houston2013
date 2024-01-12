@@ -45,4 +45,4 @@ Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459
 paperswithcode: https://paperswithcode.com/dataset/houston
 
 ## License
-Apache-2.0
+反996许可证(Anti-996-License)
