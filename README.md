@@ -103,3 +103,5 @@ T. Glenn, A. Zare, P. Gader, D. Dranishnikov. (2016). Bullwinkle: Scoring Code f
 
 ## License
 Anti-996-License
+
+Disclaim: The owner(s) of this porject does not agree any opinions of the license publishers except the license itself
