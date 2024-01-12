@@ -102,4 +102,4 @@ T. Glenn, A. Zare, P. Gader, D. Dranishnikov. (2016). Bullwinkle: Scoring Code f
 ```
 
 ## License
-Apache-2.0
+Anti-996-License
