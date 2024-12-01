@@ -2,9 +2,11 @@
 
 ---
 
-This project is still working in progress
 
-WARNING: The official website is not accessable in 2024-11-01, and we're not sure if it's a temporarily or permanently change. And this package will not work if [the official website of houston2013](https://hyperspectral.ee.uh.edu/?page_id=459) is down.
+
+**WARNING: The official website of houston2013 has been down since 2024-11-01, and we're not sure if it's a temporary or permanent change. This package will not work if [the official website of houston2013](https://hyperspectral.ee.uh.edu/?page_id=459) is down.**
+
+This project is still working in progress
 
 ---
 
