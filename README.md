@@ -5,6 +5,7 @@
 
 
 **WARNING: The official website of houston2013 has been down since 2024-11-01, and we're not sure if it's a temporary or permanent change. This package will not work if [the official website of houston2013](https://hyperspectral.ee.uh.edu/?page_id=459) is down.**
+**UPDATE: I have moved the URL to the new [official website of houston2013](https://hyperspectral.ee.uh.edu/?page_id=459)**
 
 This project is still working in progress
 
