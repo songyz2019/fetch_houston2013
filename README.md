@@ -3,7 +3,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/fetch-houston2013.svg)](https://pypi.org/project/fetch-houston2013)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fetch-houston2013.svg)](https://pypi.org/project/fetch-houston2013)
 
-Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) like a buildin function in scikit-learn.
+Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) and Muufl dataset easily and quickly.
 
 - Automatically download and cache all needed files
 - Verify checksums to avoid data poisoning
@@ -18,8 +18,12 @@ pip install fetch-houston2013
 ```
 2. import and get the dataset
 ```python
-from fetch_houston2013 import fetch_houston2013
+from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix
+# For Houston 2013
 hsi, dsm, train_label, test_label, info = fetch_houston2013()
+# For Muufl
+casi, lidar, truth, info = fetch_muufl()
+train_label, test_label = split_spmatrix(truth, 20)
 ```
 3. tips: train_label and test_label are [sparse matrix](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_array.html), you can either convert them to np.array easily by
 ```python
