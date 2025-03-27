@@ -5,10 +5,6 @@ import unittest
 from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix
 
 
-
-
-
-
 class Test(unittest.TestCase):
     def setUp(self):
         pass

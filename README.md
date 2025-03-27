@@ -32,7 +32,7 @@ test_label =test_label.todense()
 ```
 or directly use them for getting the value in a very fast way:
 ```python
-    def __getitem__(self, index) -> tuple[ndarray, ndarray, ndarray, dict]:
+    def __getitem__(self, index):
       i = self.truth.row[index]
       j = self.truth.col[index]
       label = self.truth.data[index].item()
@@ -57,11 +57,11 @@ uv publish
 We welcome all contributions, including issues, pull requests, feature requests and discussions.
 
 ## Credits
-Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459  
-paperswithcode: https://paperswithcode.com/dataset/houston  
-The 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt in this repo is exported from original 2013_IEEE_GRSS_DF_Contest_Samples_VA.roi.
-
 ```text
+Houston2013 dataset: https://machinelearning.ee.uh.edu/?page_id=459
+paperswithcode: https://paperswithcode.com/dataset/houston
+Muufl dataset: https://github.com/GatorSense/MUUFLGulfport
+The 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt in this repo is exported from original 2013_IEEE_GRSS_DF_Contest_Samples_VA.roi.
 Note: If this data is used in any publication or presentation the following reference must be cited:
 P. Gader, A. Zare, R. Close, J. Aitken, G. Tuell, “MUUFL Gulfport Hyperspectral and LiDAR Airborne Data Set,” University of Florida, Gainesville, FL, Tech. Rep. REP-2013-570, Oct. 2013.
 If the scene labels are used in any publication or presentation, the following reference must be cited:
@@ -71,6 +71,7 @@ T. Glenn, A. Zare, P. Gader, D. Dranishnikov. (2016). Bullwinkle: Scoring Code f
 ```
 
 ## License
+```text
 Copyright 2025 songyz2023
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -84,3 +85,4 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+```
