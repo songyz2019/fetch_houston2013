@@ -6,6 +6,7 @@ from os.path import exists, expanduser, join
 from pathlib import Path
 import warnings
 import hashlib
+from typing import Optional
 from zipfile import ZipFile
 import urllib
 import urllib.request
@@ -13,9 +14,9 @@ from io import StringIO
 import logging
 
 import numpy as np
-from numpy.typing import NDArray
 import skimage
-from scipy.sparse import coo_array
+from scipy.sparse import coo_array, spmatrix
+from jaxtyping import UInt16, Float32, UInt64
 
 
 def _get_data_home(data_home=None) -> str:
@@ -87,14 +88,21 @@ def _verify_files(root: Path, files_sha256: dict, extra_message: str = '') -> No
         assert sha256(root/filename) == checksum, f"Incorrect SHA256 for {filename}. Expect {checksum}, Actual {sha256(root/filename)}. {extra_message}"
 
 
-def fetch_houston2013(datahome=None, download_if_missing=True):
+def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) -> tuple[
+    UInt16[np.ndarray, '144 349 1905'],
+    Float32[np.ndarray, '1 349 1905'],
+    UInt64[spmatrix, '349 1905'],
+    UInt64[spmatrix, '349 1905'],
+    dict
+]:
     """Load the Houston2013 data-set in scikit-learn style
 
-    Download it if necessary.
+    Download it if necessary. All the image are CHW formats. And the shape are typed in the return type.
 
-    :return casi, lidar 高光谱图像(144x349x1905), 激光雷达图像(1x349x1905)
-    :return train_truth,test_truth 训练集真值和测试集真值, a 349x1905 coo_array
-    :return info 相关信息
+    :param datahome: The path to store the data files, default is '~/scikit_learn_data'
+    :param download_if_missing: Whether to download the data if it is not found
+
+    :return: (hsi, dsm, train_truth, test_truth, info)
     """
     logger = logging.getLogger("fetch_houston2013")
 
@@ -161,8 +169,8 @@ def fetch_houston2013(datahome=None, download_if_missing=True):
 
 
     # 3. 数据加载
-    lidar :NDArray = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_LiDAR.tif')[np.newaxis, :, :] # (1   349 1905)
-    casi  :NDArray = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_CASI.tif' ).transpose(2,0,1)  # (144 349 1905)
+    lidar = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_LiDAR.tif')[np.newaxis, :, :] # (1   349 1905)
+    casi  = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_CASI.tif' ).transpose(2,0,1)  # (144 349 1905)
     train_truth:coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_TR.txt', (349, 1905)) # (349 1905)
     test_truth :coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_VA.txt', (349, 1905)) # (349 1905)
 

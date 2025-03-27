@@ -24,9 +24,11 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
+  "jaxtyping>=0.3.0",
   "numpy>=1.25.0",
+  "rasterio>=1.4.3",
   "scikit-image>=0.20.0",
-  "scipy>=1.12.0"
+  "scipy>=1.12.0",
 ]
 
 [project.urls]

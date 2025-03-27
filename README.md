@@ -1,5 +1,4 @@
 # fetch_houston2013
-**English** | [中文(简体)](./README.zh-hans.md)
 
 [![PyPI - Version](https://img.shields.io/pypi/v/fetch-houston2013.svg)](https://pypi.org/project/fetch-houston2013)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fetch-houston2013.svg)](https://pypi.org/project/fetch-houston2013)
