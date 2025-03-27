@@ -14,7 +14,7 @@ from io import StringIO
 import logging
 
 import numpy as np
-import skimage
+import rasterio
 from scipy.sparse import coo_array, spmatrix
 from jaxtyping import UInt16, Float32, UInt64
 
@@ -169,8 +169,11 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
 
 
     # 3. 数据加载
-    lidar = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_LiDAR.tif')[np.newaxis, :, :] # (1   349 1905)
-    casi  = skimage.io.imread(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_CASI.tif' ).transpose(2,0,1)  # (144 349 1905)
+    with rasterio.open(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_LiDAR.tif') as f:
+        lidar = f.read()
+    with rasterio.open(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_CASI.tif') as f:
+        casi = f.read()
+
     train_truth:coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_TR.txt', (349, 1905)) # (349 1905)
     test_truth :coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_VA.txt', (349, 1905)) # (349 1905)
 
