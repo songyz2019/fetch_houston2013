@@ -14,9 +14,9 @@ from scipy.sparse import coo_array
 from jaxtyping import Float
 
 
-def fetch_muufl(datahome=None, download_if_missing=True):
+def fetch_trento(datahome=None, download_if_missing=True):
     """
-    Donwload and load the MUUFL Gulfport dataset.
+    Donwload and load the Trento dataset.
 
     Use CHW format
     """
@@ -63,18 +63,20 @@ def fetch_muufl(datahome=None, download_if_missing=True):
             else:
                 raise FileNotFoundError(f"{path} not found")
 
-        _verify_files(path.parent, {path.name: "2219e6259e3ad80521a8a7ff879916624efa61eb6df1bfd80538f6f2d4befa2c"})
+        _verify_files(path.parent, {path.name: "B203331B039D994015C4137753F15973CB638046532B8DCED6064888BF970631".lower()})
         return path
 
     # 1. 准备
-    logger = logging.getLogger("fetch_muufl")
-    URL = "https://github.com/GatorSense/MUUFLGulfport/archive/refs/tags/v0.1.zip"
+    logger = logging.getLogger("fetch_trento")
+    URL = "https://github.com/tyust-dayu/Trento/archive/b4afc449ce5d6936ddc04fe267d86f9f35536afd.zip"
     DATA_HOME = Path(_get_data_home(datahome))
-    ZIP_PATH = DATA_HOME / 'MUUFLGulfport.zip'
+    ZIP_PATH = DATA_HOME / 'Trento-b4afc449ce5d6936ddc04fe267d86f9f35536afd.zip'
     UNZIPED_PATH = DATA_HOME / 'MUUFLGulfport/'
-    ROOT = UNZIPED_PATH/'MUUFLGulfport-0.1'
+    ROOT = UNZIPED_PATH/'Trento-b4afc449ce5d6936ddc04fe267d86f9f35536afd'
     FILES_SHA256 = {
-        "MUUFLGulfportSceneLabels/muufl_gulfport_campus_1_hsi_220_label.mat": "69420a72866dff4a858ae503e6e2981af46f406a4ad8f4dd642efa43feb59edc"
+        "allgrd.mat": "7e3fb2a2ea22c2661dfc768db3cb93c9643b324e7e64fadedfa57f5edbf1818f",
+        "Italy_hsi.mat": "7b965fd405314b5c91451042e547a1923be6f5a38c6da83969032cff79729280",
+        "Italy_lidar.mat": "a04dc90368d6a7b4f9d3936024ba9fef4105456c090daa14fff31b8b79e94ab1"
     }
     if not exists(DATA_HOME):
         os.makedirs(DATA_HOME)
@@ -93,22 +95,28 @@ def fetch_muufl(datahome=None, download_if_missing=True):
         # 删除ZIP
         os.remove(ZIP_PATH)
 
-        # 显示版权信息
-        with open(ROOT / 'LICENSE', 'r', encoding='utf-8') as f:
-            logger.info(f.read())
-
     # 3. 数据加载
-    d = scipy.io.loadmat(
-        ROOT / 'MUUFLGulfportSceneLabels' / 'muufl_gulfport_campus_1_hsi_220_label.mat',
+    hsi = scipy.io.loadmat(
+        ROOT / 'Italy_hsi.mat',
         squeeze_me=True,
         mat_dtype=True,
         struct_as_record=False
-    )['hsi']
-    hsi = d.Data # HWC
-    lidar = d.Lidar[0].z
-    truth = d.sceneLabels.labels
-    truth[truth==-1] = 0
-    truth = coo_array(truth, dtype='int')
+    )['data']
+
+    lidar = scipy.io.loadmat(
+        ROOT / 'Italy_lidar.mat',
+        squeeze_me=True,
+        mat_dtype=True,
+        struct_as_record=False
+    )['data']
+
+    truth = scipy.io.loadmat(
+        ROOT / 'allgrd.mat',
+        squeeze_me=True,
+        mat_dtype=True,
+        struct_as_record=False
+    )['mask_test']
+    truth = coo_array(truth)
 
     info = {
         'name': 'MUUFL Gulfport',
@@ -117,28 +125,14 @@ def fetch_muufl(datahome=None, download_if_missing=True):
         'license': 'MIT',
         'n_band_casi': hsi.shape[-1],
         'n_band_lidar': lidar.shape[-1],
-        'n_class': d.sceneLabels.Materials_Type.size,
+        # 'n_class': d.sceneLabels.Materials_Type.size,
         'width': hsi.shape[1],
         'height': hsi.shape[0],
-        'label_dict': dict(enumerate(d.sceneLabels.Materials_Type, start=1))
+        # 'label_dict': dict(enumerate(d.sceneLabels.Materials_Type, start=1))
     }
 
     return hsi.transpose(2,0,1), lidar.transpose(2,0,1), truth, info
 
 
-def split_spmatrix(a, n_samples=20, seed=0x0d000721):
-    np.random.seed(seed)
-    train = coo_array(([],([],[])),a.shape, dtype='int')
-    n_class = a.data.max()
-    for cid in range(1,n_class+1):
-        N = len(a.data[a.data==cid])
-        indice = np.random.choice(N, n_samples, replace=False)
-        row = a.row[a.data==cid][indice]
-        col = a.col[a.data==cid][indice]
-        val = np.ones(len(row)) * cid
-        train += coo_array((val, (row, col)), shape=a.shape, dtype='int')
-    test = (a - train)
-    return train.tocoo(),test.tocoo()
 
-
-__all__ = ['fetch_muufl', 'split_spmatrix']
+__all__ = ['fetch_trento']
