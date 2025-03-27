@@ -11,6 +11,7 @@ import numpy as np
 import scipy.io
 
 from scipy.sparse import coo_array
+from jaxtyping import Float
 
 
 def fetch_muufl(datahome=None, download_if_missing=True):
@@ -83,7 +84,6 @@ def fetch_muufl(datahome=None, download_if_missing=True):
         _verify_files(ROOT, FILES_SHA256, f"please try removing {ROOT}")
     else:
         fetch_zip(URL, ZIP_PATH, download_if_missing)
-        # 解压 2013_DFTC 目录下的所有文件
         logger.info(f"Decompressing {ZIP_PATH}")
         with ZipFile(ZIP_PATH, 'r') as zip_file:
             zip_file.extractall(UNZIPED_PATH)
@@ -124,6 +124,7 @@ def fetch_muufl(datahome=None, download_if_missing=True):
     }
 
     return hsi.transpose(2,0,1), lidar.transpose(2,0,1), truth, info
+
 
 def choice_coo_array(a, n_samples=20, n_class=11, seed=0x0d000721):
     np.random.seed(seed)
