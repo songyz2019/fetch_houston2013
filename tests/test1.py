@@ -33,7 +33,7 @@ class Test(unittest.TestCase):
         casi, lidar, truth, info = fetch_muufl()
         train_label, test_label = split_spmatrix(truth, 20)
         self.assertEqual(casi.shape, (64, 325, 220))
-        self.assertEqual(lidar.shape, (1, 325, 220))
+        self.assertEqual(lidar.shape, (2, 325, 220))
         self.assertEqual(truth.shape, (325, 220))
         self.assertEqual(train_label.shape, (325, 220))
         self.assertEqual(test_label.shape, (325, 220))
