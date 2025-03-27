@@ -3,7 +3,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/fetch-houston2013.svg)](https://pypi.org/project/fetch-houston2013)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fetch-houston2013.svg)](https://pypi.org/project/fetch-houston2013)
 
-Download and load Houston 2013 Dataset, Trento dataset and Muufl dataset easily and quickly.
+Download and load Houston 2013 Dataset, Trento dataset and Muufl dataset easily and swiftly.
 
 - Automatically download and cache all needed files
 - Verify checksums to avoid data poisoning
