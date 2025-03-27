@@ -37,9 +37,9 @@ or directly use them for getting the value in a very fast way:
       return x_hsi, x_dsm, label
 ```
 
-## Troubleshooting
-Remove `~/scikit_learn_data` to clean cache and try again.  
-We download dataset from official website and pastbin.com. Make sure you can access these websites.
+## Help
+1. Remove `~/scikit_learn_data` to clean cache and try again.  
+2. We download dataset from official website and pastbin.com. Make sure you can access these websites.
 
 ## Build and Publish
 ```bash
@@ -48,6 +48,9 @@ uv build
 bash load_secrets.bash
 uv publish
 ```
+
+## Contribution
+We welcome all contributions, including issues, pull requests, feature requests and discussions.
 
 ## Credits
 Houston2013 dataset: https://hyperspectral.ee.uh.edu/?page_id=459  
