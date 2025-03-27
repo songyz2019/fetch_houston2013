@@ -126,7 +126,7 @@ def fetch_muufl(datahome=None, download_if_missing=True):
     return hsi.transpose(2,0,1), lidar.transpose(2,0,1), truth, info
 
 
-def choice_coo_array(a, n_samples=20, n_class=11, seed=0x0d000721):
+def split_spmatrix(a, n_samples=20, n_class=11, seed=0x0d000721):
     np.random.seed(seed)
     train = coo_array(([],([],[])),a.shape, dtype='int')
     for cid in range(1,n_class+1):
@@ -140,4 +140,4 @@ def choice_coo_array(a, n_samples=20, n_class=11, seed=0x0d000721):
     return train.tocoo(),test.tocoo()
 
 
-__all__ = ['fetch_muufl']
+__all__ = ['fetch_muufl', 'split_spmatrix']

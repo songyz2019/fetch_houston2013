@@ -88,7 +88,7 @@ dependencies = [
 requires-dist = [
     { name = "jaxtyping", specifier = ">=0.3.0" },
     { name = "numpy", specifier = ">=1.25.0" },
-    { name = "rasterio", specifier = ">=1.4.3" },
+    { name = "rasterio", specifier = ">=1.2.0" },
     { name = "scipy", specifier = ">=1.12.0" },
 ]
 
