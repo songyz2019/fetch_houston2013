@@ -1,23 +1,64 @@
-[tool.poetry]
-name = "fetch-houston2013"
-version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
-license = "GPL-3.0-only"
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "3.12"
-numpy = "^1.26.1"
-pillow = "^10.1.0"
-scikit-image = "^0.22.0"
-
-
-[[tool.poetry.source]]
-name = "mirrors"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
-priority = "default"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fetch-houston2013"
+dynamic = ["version"]
+description = 'Download and load Houston 2013 Dataset'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+keywords = []
+authors = [
+  { name = "songyz2023", email = "songyz2023dlut@outlook.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "numpy>=1.25.0",
+  "scikit-image>=0.20.0",
+  "scipy>=1.12.0"
+]
+
+[project.urls]
+Documentation = "https://github.com/songyz2023/fetch-houston2013#readme"
+Issues = "https://github.com/songyz2023/fetch-houston2013/issues"
+Source = "https://github.com/songyz2023/fetch-houston2013"
+
+[tool.hatch.version]
+path = "src/fetch_houston2013/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/fetch_houston2013 tests}"
+
+[tool.coverage.run]
+source_pkgs = ["fetch_houston2013", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/fetch_houston2013/__about__.py",
+]
+
+[tool.coverage.paths]
+fetch_houston2013 = ["src/fetch_houston2013", "*/fetch-houston2013/src/fetch_houston2013"]
+tests = ["tests", "*/fetch-houston2013/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

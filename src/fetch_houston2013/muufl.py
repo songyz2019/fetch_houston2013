@@ -1,7 +1,6 @@
 import os
 from os.path import exists, expanduser, join
 from pathlib import Path
-import warnings
 import hashlib
 from zipfile import ZipFile
 import urllib
@@ -11,10 +10,7 @@ import logging
 import numpy as np
 import scipy.io
 
-import skimage
-from torch.utils.data import Dataset
 from scipy.sparse import coo_array
-import h5py
 
 
 def fetch_muufl(datahome=None, download_if_missing=True):
@@ -143,61 +139,4 @@ def choice_coo_array(a, n_samples=20, n_class=11, seed=0x0d000721):
     return train.tocoo(),test.tocoo()
 
 
-class Muufl(Dataset):
-    """
-    A preprocessed houston2013 dataset
-    """
-
-    def preprocess(self):
-        # 归一化
-        self.HSI  = skimage.exposure.rescale_intensity(self.HSI, out_range='float32')  # 默认[0,1]
-        self.LIDAR = skimage.exposure.rescale_intensity(self.LIDAR, out_range='float32')  # 默认[0,1]
-
-        # 填充
-        r = self.patch_radius
-        pad_shape = ((0, 0), (r, r), (r, r))  # 只pad后两个维度
-        self.hsi  = np.pad(self.HSI, pad_shape, 'symmetric')
-        self.lidar = np.pad(self.LIDAR, pad_shape, 'symmetric')
-
-        # 划分数据集
-        train_truth, test_truth = choice_coo_array(self.UNDIVIDED_TRUTH, n_samples=20, n_class=self.INFO['n_class'])
-        self.TRUTH = train_truth if self.TRAIN else test_truth
-
-    def __init__(self, root: Path = None, train=True, download=True, patch_radius=3):
-        self.lidar = None
-        self.hsi = None
-        self.patch_radius = patch_radius
-        self.TRAIN = train
-        self.HSI, self.LIDAR, self.UNDIVIDED_TRUTH, self.INFO = fetch_muufl(root, download)
-        self.TRUTH = None
-        self.preprocess()
-
-    def __len__(self):
-        return self.TRUTH.count_nonzero()
-
-    def __getitem__(self, index):
-        r = self.patch_radius
-        R = r+1 # 因为Python切片是左闭右开,所以用R来表示右边界
-
-        i = self.TRUTH.row[index] + r  # 补上pad导致的偏移
-        j = self.TRUTH.col[index] + r
-        cid = self.TRUTH.data[index].item()
-
-        x_hsi   = self.hsi  [:, i-r:i+R, j-r:j+R]
-        x_lidar = self.lidar[:, i-r:i+R, j-r:j+R]
-        y = np.eye(self.INFO['n_class'])[cid-1]
-
-        # 额外信息: 当前点的坐标
-        extras = {}
-        if not self.TRAIN:
-            extras = {
-                "x": i-r,
-                "y": j-r,
-                "index": index,
-                "class": cid
-            }
-
-        return x_hsi, x_lidar, y, extras
-
-
-__all__ = ['Muufl', 'fetch_muufl']
+__all__ = ['fetch_muufl']
