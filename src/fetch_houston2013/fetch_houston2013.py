@@ -111,7 +111,7 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
         """
         if not exists(path):
             if download_if_missing:
-                url = "https://hyperspectral.ee.uh.edu/2egf4tg8hial13gt/2013_DFTC.zip"
+                url = "https://machinelearning.ee.uh.edu/2egf4tg8hial13gt/2013_DFTC.zip"
                 opener = urllib.request.build_opener()
                 opener.addheaders = [('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36')]
                 urllib.request.install_opener(opener)
