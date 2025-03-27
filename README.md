@@ -7,7 +7,6 @@ Download and load Houston 2013 Dataset (2013 IEEE GRSS Data Fusion Contest) like
 
 - Automatically download and cache all needed files
 - Verify checksums to avoid data poisoning
-- Show copyright of the dataset
 - Use sparse matrix to representing ground truth, less memory usage and easier iteration
 
 ![screenshot](screenshot.jpg)
@@ -21,6 +20,21 @@ pip install fetch-houston2013
 ```python
 from fetch_houston2013 import fetch_houston2013
 hsi, dsm, train_label, test_label, info = fetch_houston2013()
+```
+3. tips: train_label and test_label are [sparse matrix](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_array.html), you can either convert them to np.array easily by
+```python
+train_label=train_label.todense()
+test_label =test_label.todense()
+```
+or directly use them for getting the value in a very fast way:
+```python
+    def __getitem__(self, index) -> tuple[ndarray, ndarray, ndarray, dict]:
+      i = self.truth.row[index]
+      j = self.truth.col[index]
+      label = self.truth.data[index].item()
+      x_hsi = self.hsi[:, i, j]
+      x_dsm = self.dsm[:, i, j]
+      return x_hsi, x_dsm, label
 ```
 
 ## Troubleshooting
