@@ -156,8 +156,14 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
 
         if not exists(FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt'):
             logger.info(f"Downloading 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt")
-            urllib.request.urlretrieve("https://pastebin.com/raw/FJyu5SQX", FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
-            # Mirror: urllib.request.urlretrieve("https://github.com/songyz2019/fetch_houston2013/raw/main/data/2013_IEEE_GRSS_DF_Contest_Samples_VA.txt", FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
+            va_urls = ["https://raw.githubusercontent.com/songyz2019/fetch_houston2013/500afb3bf98c76a75d06600213cfd7c2be2d99e2/data/2013_IEEE_GRSS_DF_Contest_Samples_VA.txt", 'https://pastebin.com/raw/FJyu5SQX']
+            for va_url in va_urls:
+                try:
+                    urllib.request.urlretrieve(va_url, FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
+                except Exception as e:
+                    print(f"Error fetching {va_url}, using mirrors.")
+                else:
+                    break
         _verify_files(FILES_PATH, FILES_SHA256)
 
         # 删除ZIP
