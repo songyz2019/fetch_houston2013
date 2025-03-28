@@ -156,7 +156,7 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
 
         if not exists(FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt'):
             logger.info(f"Downloading 2013_IEEE_GRSS_DF_Contest_Samples_VA.txt")
-            va_urls = ["https://raw.githubusercontent.com/songyz2019/fetch_houston2013/500afb3bf98c76a75d06600213cfd7c2be2d99e2/data/2013_IEEE_GRSS_DF_Contest_Samples_VA.txt", 'https://pastebin.com/raw/FJyu5SQX']
+            va_urls = ["https://github.com/songyz2019/fetch_houston2013/raw/8539c932284a0d2ae60e7f968f430c42d4d1c09a/data/2013_IEEE_GRSS_DF_Contest_Samples_VA.txt", 'https://pastebin.com/raw/FJyu5SQX']
             for va_url in va_urls:
                 try:
                     urllib.request.urlretrieve(va_url, FILES_PATH/'2013_IEEE_GRSS_DF_Contest_Samples_VA.txt')
