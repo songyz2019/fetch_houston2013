@@ -72,6 +72,9 @@ hsi, dsm, train_label, test_label, info = fetch_houston2013()
 lbl2rgb(test_label, 'houston2013')
 ```
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=songyz2019/fetch_houston2013&type=Date)](https://www.star-history.com/#songyz2019/fetch_houston2013&Date)
 
 ## Contribution
 We welcome all contributions, including issues, pull requests, feature requests and discussions.
