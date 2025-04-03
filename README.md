@@ -71,6 +71,10 @@ Since 0.6, a label-to-rgb util is introduced, it's under development
 ## Contribution
 We welcome all contributions, including issues, pull requests, feature requests and discussions.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=songyz2019/fetch_houston2013&type=Date)](https://www.star-history.com/#songyz2019/fetch_houston2013&Date)
+
 ## Credits
 ```text
 Houston2013 dataset: https://machinelearning.ee.uh.edu/?page_id=459
