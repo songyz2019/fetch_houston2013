@@ -119,16 +119,23 @@ def fetch_trento(datahome=None, download_if_missing=True):
     truth = coo_array(truth)
 
     info = {
-        'name': 'MUUFL Gulfport',
+        'name': 'Trento',
         'version': '0.1',
-        'homepage': 'https://github.com/GatorSense/MUUFLGulfport',
-        'license': 'MIT',
+        'homepage': None,
+        'license': None,
         'n_band_casi': hsi.shape[-1],
         'n_band_lidar': lidar.shape[-1],
-        # 'n_class': d.sceneLabels.Materials_Type.size,
+        'n_class': 6,
         'width': hsi.shape[1],
         'height': hsi.shape[0],
-        # 'label_dict': dict(enumerate(d.sceneLabels.Materials_Type, start=1))
+        'label_dict': {
+            1: "Apple Trees",
+            2: "Building",
+            3: "Ground",
+            4: "Woods",
+            5: "Vineyard",
+            6: "Roads"
+        }
     }
 
     return hsi.transpose(2,0,1), lidar.transpose(2,0,1), truth, info

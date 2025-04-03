@@ -48,13 +48,25 @@ or directly use them for getting the value in a very fast way:
 1. Remove `~/scikit_learn_data` to clean cache and try again.  
 2. We download dataset from official website and pastbin.com. Make sure you can access these websites.
 
-## Build and Publish
+## Build
 ```bash
 # install uv
 uv build
 bash load_secrets.bash
 uv publish
 ```
+
+## Experimental Features
+### torch
+Since 0.6, a new torch dataset is under testing, the API is under designing, you can try it:
+```python
+from fetch_houston2013.torch import Houston2013, Trento, Muufl
+dataset = Muufl(subset='train')
+x_h, x_l, y, extras = dataset[0]
+```
+### util.lbl2rgb
+Since 0.6, a label-to-rgb util is introduced, it's under development
+
 
 ## Contribution
 We welcome all contributions, including issues, pull requests, feature requests and discussions.

@@ -24,9 +24,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "jaxtyping>=0.3.0",
-  "numpy>=1.25.0",
+  "jaxtyping>=0.2.0",
+  "numpy>=2.0.0",
   "rasterio>=1.2.0",
+  "scikit-image>=0.23.0",
   "scipy>=1.12.0",
 ]
 
@@ -62,4 +63,10 @@ exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+]
+
+[dependency-groups]
+dev = [
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
 ]

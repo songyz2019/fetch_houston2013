@@ -44,6 +44,29 @@ class Test(unittest.TestCase):
         self.assertEqual(train_label.shape, (166, 600))
         self.assertEqual(test_label.shape, (166, 600))
 
+    def test_torch_dataset(self):
+        # 测试torch_dataset.py中的数据集
+        from fetch_houston2013.torch import Houston2013, Trento, Muufl
+        dataset = Houston2013(patch_radius=7, subset='train')
+        x_h, x_l, y, extras = dataset[0]
+        self.assertEqual(len(dataset), 2832)
+
+        dataset = Muufl(patch_radius=11, subset='train')
+        x_h, x_l, y, extras = dataset[0]
+        self.assertEqual(len(dataset), 220)
+
+        dataset = Trento(patch_radius=11, subset='train')
+        x_h, x_l, y, extras = dataset[0]
+        self.assertEqual(len(dataset), 120)
+
+    def test_torch_muufl(self):
+        from fetch_houston2013.torch import Muufl
+        dataset = Muufl(subset='train')
+        x_h, x_l, y, extras = dataset[0]
+        self.assertEqual(x_h.shape, (64,11,11))
+        self.assertEqual(x_l.shape, (1,11,11))
+        self.assertEqual(y.shape, (dataset.n_class, ))
+
 
 if __name__ == '__main__':
     unittest.main()
