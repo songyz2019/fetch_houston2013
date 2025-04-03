@@ -66,6 +66,11 @@ x_h, x_l, y, extras = dataset[0]
 ```
 ### util.lbl2rgb
 Since 0.6, a label-to-rgb util is introduced, it's under development
+```python
+from fetch_houston2013.util import lbl2rgb
+hsi, dsm, train_label, test_label, info = fetch_houston2013()
+lbl2rgb(test_label, 'houston2013')
+```
 
 
 ## Contribution

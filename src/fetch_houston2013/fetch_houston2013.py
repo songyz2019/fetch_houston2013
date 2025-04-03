@@ -2,15 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-from os.path import exists, expanduser, join
+from os.path import exists
 from pathlib import Path
-import warnings
-import hashlib
 from typing import Optional
 from zipfile import ZipFile
 import urllib
 import urllib.request
-from io import StringIO
 import logging
 
 import numpy as np
@@ -18,75 +15,7 @@ import rasterio
 from scipy.sparse import coo_array, spmatrix
 from jaxtyping import UInt16, Float32, UInt64
 
-
-def _get_data_home(data_home=None) -> str:
-    if data_home is None:
-        data_home = os.environ.get("SCIKIT_LEARN_DATA", join("~", "scikit_learn_data"))
-    data_home = expanduser(data_home)
-    os.makedirs(data_home, exist_ok=True)
-    return data_home
-
-
-def _read_roi(path :Path, shape) -> coo_array:
-    """
-    读取ENVI软件导出roi文件得到的txt文件,得到一个稀疏矩阵图像
-
-    用起来像字典
-
-    :param path: 文件路径
-    :return: An coo_array image representing the ROI
-    """
-    warnings.simplefilter("ignore", category=UserWarning) # Supress loadtxt's warning when data is empty
-
-    img = coo_array(shape, dtype='uint')
-    buf = ""
-    cid = 1
-    with open(path, 'r') as f:
-        while True:
-            line = f.readline()
-            if line == os.linesep or line == "":
-                data=np.loadtxt(StringIO(buf), usecols=(2, 1), comments=';', dtype='uint')
-                buf = ""
-                if data.size > 0:
-                    rows,cols = data.T
-                    vals = cid*np.ones_like(rows)
-                    cid += 1
-                    img += coo_array((vals,(rows,cols)), shape=shape)
-                    img.data[img.data>cid] = 0  # 清除重复像素点
-            else:
-                buf += line
-
-            if line == "":
-                break
-
-    warnings.resetwarnings()
-
-    return img.tocoo()
-
-
-def _verify_files(root: Path, files_sha256: dict, extra_message: str = '') -> None:
-    """验证root下的文件的sha256是否与files_sha256相符
-
-    :param extra_message: 额外报错信息
-    :param files_sha256: 例如: `{"1.txt", "f4d619....", "2.txt": "9d03010....."}`
-    :param root: 文件夹目录
-    """
-
-    def sha256(path):
-        """Calculate the sha256 hash of the file at path."""
-        sha256hash = hashlib.sha256()
-        chunk_size = 8192
-        with open(path, "rb") as f:
-            while True:
-                buffer = f.read(chunk_size)
-                if not buffer:
-                    break
-                sha256hash.update(buffer)
-        return sha256hash.hexdigest()
-
-    for filename, checksum in files_sha256.items():
-        assert sha256(root/filename) == checksum, f"Incorrect SHA256 for {filename}. Expect {checksum}, Actual {sha256(root/filename)}. {extra_message}"
-
+from fetch_houston2013.util.fileio import get_data_home, verify_files, read_roi
 
 def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) -> tuple[
     UInt16[np.ndarray, '144 349 1905'],
@@ -122,11 +51,11 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
             else:
                 raise FileNotFoundError(f"{path} not found")
 
-        _verify_files(path.parent, {path.name: "f4d619d5cbcb09d0301038f1b8fe83def6c2d484334b7b8127740a00ecf7e245"})
+        verify_files(path.parent, {path.name: "f4d619d5cbcb09d0301038f1b8fe83def6c2d484334b7b8127740a00ecf7e245"})
         return path
 
     # 1. 准备数据
-    DATA_HOME = Path(_get_data_home(datahome))
+    DATA_HOME = Path(get_data_home(datahome))
     ZIP_PATH = DATA_HOME / 'Houston2013.zip'
     UNZIPED_PATH = DATA_HOME / 'Houston2013/'
     FILES_PATH = UNZIPED_PATH/'2013_DFTC'
@@ -146,7 +75,7 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
 
     # 2.下载数据集zip文件并解压
     if exists(FILES_PATH) and len(os.listdir(FILES_PATH)) > 0:  # 已存在解压的文件夹且非空
-        _verify_files(FILES_PATH, FILES_SHA256, f"please try removing {FILES_PATH}")
+        verify_files(FILES_PATH, FILES_SHA256, f"please try removing {FILES_PATH}")
     else:
         fetch_houston2013zip(ZIP_PATH, download_if_missing)
         # 解压 2013_DFTC 目录下的所有文件
@@ -164,7 +93,7 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
                     print(f"Error fetching {va_url}, using mirrors.")
                 else:
                     break
-        _verify_files(FILES_PATH, FILES_SHA256)
+        verify_files(FILES_PATH, FILES_SHA256)
 
         # 删除ZIP
         os.remove(ZIP_PATH)
@@ -180,8 +109,8 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
     with rasterio.open(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_CASI.tif') as f:
         casi = f.read()
 
-    train_truth:coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_TR.txt', (349, 1905)) # (349 1905)
-    test_truth :coo_array= _read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_VA.txt', (349, 1905)) # (349 1905)
+    train_truth:coo_array= read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_TR.txt', (349, 1905)) # (349 1905)
+    test_truth :coo_array= read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_VA.txt', (349, 1905)) # (349 1905)
 
     info = {
         'name': 'houston2013',

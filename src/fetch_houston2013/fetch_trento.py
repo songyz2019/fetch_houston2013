@@ -12,7 +12,7 @@ import scipy.io
 
 from scipy.sparse import coo_array
 from jaxtyping import Float
-
+from fetch_houston2013.util.fileio import get_data_home, verify_files
 
 def fetch_trento(datahome=None, download_if_missing=True):
     """
@@ -20,36 +20,7 @@ def fetch_trento(datahome=None, download_if_missing=True):
 
     Use CHW format
     """
-    def _verify_files(root: Path, files_sha256: dict, extra_message: str = '') -> None:
-        """验证root下的文件的sha256是否与files_sha256相符
 
-        :param extra_message: 额外报错信息
-        :param files_sha256: 例如: `{"1.txt", "f4d619....", "2.txt": "9d03010....."}`
-        :param root: 文件夹目录
-        """
-
-        def sha256(path):
-            """Calculate the sha256 hash of the file at path."""
-            sha256hash = hashlib.sha256()
-            chunk_size = 8192
-            with open(path, "rb") as f:
-                while True:
-                    buffer = f.read(chunk_size)
-                    if not buffer:
-                        break
-                    sha256hash.update(buffer)
-            return sha256hash.hexdigest()
-
-        for filename, checksum in files_sha256.items():
-            assert sha256(
-                root / filename) == checksum, f"Incorrect SHA256 for {filename}. Expect {checksum}, Actual {sha256(root / filename)}. {extra_message}"
-
-    def _get_data_home(data_home=None) -> str:
-        if data_home is None:
-            data_home = os.environ.get("SCIKIT_LEARN_DATA", join("~", "scikit_learn_data"))
-        data_home = expanduser(data_home)
-        os.makedirs(data_home, exist_ok=True)
-        return data_home
     def fetch_zip(url, path: Path, download_if_missing: bool = True) -> Path:
         """Make sure `path` is the zip file of Houston2013, or raise FileNotFoundError
         """
@@ -63,13 +34,13 @@ def fetch_trento(datahome=None, download_if_missing=True):
             else:
                 raise FileNotFoundError(f"{path} not found")
 
-        _verify_files(path.parent, {path.name: "B203331B039D994015C4137753F15973CB638046532B8DCED6064888BF970631".lower()})
+        verify_files(path.parent, {path.name: "B203331B039D994015C4137753F15973CB638046532B8DCED6064888BF970631".lower()})
         return path
 
     # 1. 准备
     logger = logging.getLogger("fetch_trento")
     URL = "https://github.com/tyust-dayu/Trento/archive/b4afc449ce5d6936ddc04fe267d86f9f35536afd.zip"
-    DATA_HOME = Path(_get_data_home(datahome))
+    DATA_HOME = Path(get_data_home(datahome))
     ZIP_PATH = DATA_HOME / 'Trento-b4afc449ce5d6936ddc04fe267d86f9f35536afd.zip'
     UNZIPED_PATH = DATA_HOME / 'MUUFLGulfport/'
     ROOT = UNZIPED_PATH/'Trento-b4afc449ce5d6936ddc04fe267d86f9f35536afd'
@@ -83,14 +54,14 @@ def fetch_trento(datahome=None, download_if_missing=True):
 
     # 2.下载数据集zip文件并解压
     if exists(ROOT) and len(os.listdir(ROOT)) > 0:  # 已存在解压的文件夹且非空
-        _verify_files(ROOT, FILES_SHA256, f"please try removing {ROOT}")
+        verify_files(ROOT, FILES_SHA256, f"please try removing {ROOT}")
     else:
         fetch_zip(URL, ZIP_PATH, download_if_missing)
         logger.info(f"Decompressing {ZIP_PATH}")
         with ZipFile(ZIP_PATH, 'r') as zip_file:
             zip_file.extractall(UNZIPED_PATH)
 
-        _verify_files(ROOT, FILES_SHA256)
+        verify_files(ROOT, FILES_SHA256)
 
         # 删除ZIP
         os.remove(ZIP_PATH)
