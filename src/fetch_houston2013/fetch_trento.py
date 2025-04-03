@@ -90,7 +90,8 @@ def fetch_trento(datahome=None, download_if_missing=True):
     truth = coo_array(truth)
 
     info = {
-        'name': 'Trento',
+        'name': 'trento',
+        'description': 'Trento dataset',
         'version': '0.1',
         'homepage': None,
         'license': None,

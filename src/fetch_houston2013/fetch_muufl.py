@@ -81,7 +81,8 @@ def fetch_muufl(datahome=None, download_if_missing=True):
     truth = coo_array(truth, dtype='int')
 
     info = {
-        'name': 'MUUFL Gulfport',
+        'name': 'muufl',
+        'description': 'MUUFL Gulfport dataset',
         'version': '0.1',
         'homepage': 'https://github.com/GatorSense/MUUFLGulfport',
         'license': 'MIT',
