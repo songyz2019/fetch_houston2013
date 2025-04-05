@@ -30,23 +30,37 @@ def read_roi(path :Path, shape) -> coo_array:
     img = coo_array(shape, dtype='uint')
     buf = ""
     cid = 1
+    
     with open(path, 'r') as f:
-        while True:
-            line = f.readline()
-            if line == os.linesep or line == "":
+        for line in f:
+            # Comments
+            if line.startswith(";") or line.isspace():
+                continue
+
+            # Seprator
+            if line.lstrip().startswith("1 "): # magick string for compatibility
                 data=np.loadtxt(StringIO(buf), usecols=(2, 1), comments=';', dtype='uint')
                 buf = ""
                 if data.size > 0:
                     rows,cols = data.T
                     vals = cid*np.ones_like(rows)
                     cid += 1
-                    img += coo_array((vals,(rows,cols)), shape=shape)
+                    # breakpoint()
+                    img += coo_array((vals,(rows,cols)), shape=shape) # There may be duplicate points in roi file, so these steps are essential
                     img.data[img.data>cid] = 0  # 清除重复像素点
+            # Data
             else:
                 buf += line
 
-            if line == "":
-                break
+        # Read last block  
+        if buf!="":
+            data=np.loadtxt(StringIO(buf), usecols=(2, 1), comments=';', dtype='uint')
+            buf = ""
+            if data.size > 0:
+                rows,cols = data.T
+                vals = cid*np.ones_like(rows)
+                img += coo_array((vals,(rows,cols)), shape=shape)
+
 
     warnings.resetwarnings()
 

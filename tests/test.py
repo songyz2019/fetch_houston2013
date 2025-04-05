@@ -2,8 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
+
+import numpy as np
+import skimage
 from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix, fetch_trento
 from fetch_houston2013.torch import Muufl, Houston2013, Trento
+from fetch_houston2013.util import lbl2rgb
 import torch
 from torch.utils.data import DataLoader
 from itertools import product
@@ -75,6 +79,27 @@ class Test(unittest.TestCase):
         for Dataset, subset, patch_size in product([Houston2013, Muufl, Trento], ['train', 'test', 'full'], [1, 5, 10, 11]):
             dataset = Dataset(subset=subset, patch_size=patch_size)
             self.torch_dataloader_test(dataset)
+
+    def test_lbl2rgb(self):
+        _, _, train_truth, test_truth, info = fetch_houston2013()
+        self.assertEqual(train_truth.data.max(), info['n_class'])
+        self.assertEqual(train_truth.data.min(), 1)
+        self.assertEqual(train_truth.todense().min(), 0)
+        self.assertEqual(test_truth.data.max(), info['n_class'])
+        self.assertEqual(test_truth.data.min(), 1)
+        self.assertEqual(test_truth.todense().min(), 0)
+
+        y = np.eye(info['n_class']+1)[test_truth.todense()].transpose(2, 0, 1) # One Hot
+        self.assertEqual(y.shape, (info['n_class']+1, 349, 1905))
+
+        rgb = lbl2rgb(y, info['name'])
+        self.assertEqual(rgb.shape, (3, 349, 1905))
+        self.assertLessEqual(rgb.max(), 1.0)
+        self.assertGreaterEqual(rgb.min(), 0.0)
+
+        img = (rgb*255.0).astype(np.uint8).transpose(1, 2, 0)
+        skimage.io.imsave(f'dist/{info['name']}_test_truth.png', img)
+        
 
 if __name__ == '__main__':
     unittest.main()

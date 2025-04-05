@@ -1,8 +1,9 @@
 import skimage
 import torch
 import numpy as np
+from jaxtyping import Float
 
-def lbl2rgb(lbl, palette, kind='overlay'):
+def lbl2rgb(lbl :Float[np.ndarray|torch.Tensor, '... C H W'], palette, kind='overlay') -> Float[np.ndarray|torch.Tensor, '... 3 H W']:
     """
     符合实验室内部 格式要求的OneHot标签转图像函数
 

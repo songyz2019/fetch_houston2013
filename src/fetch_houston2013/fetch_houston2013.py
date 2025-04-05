@@ -27,7 +27,8 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
     """Load the Houston2013 data-set in scikit-learn style
 
     Download it if necessary. All the image are CHW formats. And the shape are typed in the return type.
-
+    The background label is 0, and the rest are 1-15.
+    
     :param datahome: The path to store the data files, default is '~/scikit_learn_data'
     :param download_if_missing: Whether to download the data if it is not found
 
