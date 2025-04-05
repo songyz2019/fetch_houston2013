@@ -119,8 +119,8 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "torch", specifier = ">=2.5.0" },
-    { name = "torchvision", specifier = ">=0.20.1" },
+    { name = "torch", specifier = ">=1.10.0" },
+    { name = "torchvision", specifier = ">=0.11.0" },
 ]
 
 [[package]]
