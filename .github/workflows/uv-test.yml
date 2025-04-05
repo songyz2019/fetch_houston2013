@@ -29,7 +29,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - run: uv sync --frozen
+    - run: uv sync # --frozen
     - run: uv build
     - run: uv run tests/test.py
 
