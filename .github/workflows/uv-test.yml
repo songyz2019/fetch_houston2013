@@ -24,12 +24,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - uses: astral-sh/setup-uv@v5
       with:
         python-version: ${{ matrix.python-version }}
 
-    - run: uv sync
+    - run: uv sync --frozen
     - run: uv build
     - run: uv run tests/test.py
 
