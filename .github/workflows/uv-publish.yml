@@ -3,13 +3,14 @@ name: uv-publish
 on:
     workflow_dispatch:
 
+        
 permissions:
   contents: read
   id-token: write
   
 jobs:
   build:
-
+    environment: pypi_publish
     runs-on: ubuntu-latest
 
     strategy:
