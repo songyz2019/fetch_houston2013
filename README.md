@@ -44,7 +44,9 @@ or directly use them for getting the value in a very fast way:
       return x_hsi, x_dsm, label
 ```
 
-## Documatation
+## Help
+- [GitHub Wiki](https://github.com/songyz2019/fetch_houston2013/wiki)
+
 1. Remove `~/scikit_learn_data` to clean cache and try again.  
 2. We download dataset from official website and pastbin.com. Make sure you can access these websites.
 
