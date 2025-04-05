@@ -41,8 +41,29 @@ class Test(unittest.TestCase):
             else:
                 n_test -= 1
 
+    def generate_lbl2rgb(self, truth, info, subset):
+        h,w = truth.shape
+        y = np.eye(info['n_class']+1)[truth.todense()].transpose(2, 0, 1) # One Hot
+        self.assertEqual(y.shape, (info['n_class']+1, h, w))
+
+        rgb = lbl2rgb(y, info['name'])
+        self.assertEqual(rgb.shape, (3, h, w))
+        self.assertLessEqual(rgb.max(), 1.0)
+        self.assertGreaterEqual(rgb.min(), 0.0)
+
+        img = (rgb*255.0).astype(np.uint8).transpose(1, 2, 0)
+        skimage.io.imsave(f'dist/{info['name']}_{subset}.png', img)
+
     def test_fetch_houston2013(self):
         casi, lidar, train_truth, test_truth, info = fetch_houston2013()
+
+        self.assertEqual(train_truth.data.max(), info['n_class'])
+        self.assertEqual(train_truth.data.min(), 1)
+        self.assertEqual(train_truth.todense().min(), 0)
+        self.assertEqual(test_truth.data.max(), info['n_class'])
+        self.assertEqual(test_truth.data.min(), 1)
+        self.assertEqual(test_truth.todense().min(), 0)
+
         self.assertEqual(casi.shape, (144, 349, 1905))
         self.assertEqual(lidar.shape, (1, 349, 1905))
         self.assertEqual(train_truth.shape, (349, 1905))
@@ -81,24 +102,16 @@ class Test(unittest.TestCase):
             self.torch_dataloader_test(dataset)
 
     def test_lbl2rgb(self):
-        _, _, train_truth, test_truth, info = fetch_houston2013()
-        self.assertEqual(train_truth.data.max(), info['n_class'])
-        self.assertEqual(train_truth.data.min(), 1)
-        self.assertEqual(train_truth.todense().min(), 0)
-        self.assertEqual(test_truth.data.max(), info['n_class'])
-        self.assertEqual(test_truth.data.min(), 1)
-        self.assertEqual(test_truth.todense().min(), 0)
-
-        y = np.eye(info['n_class']+1)[test_truth.todense()].transpose(2, 0, 1) # One Hot
-        self.assertEqual(y.shape, (info['n_class']+1, 349, 1905))
-
-        rgb = lbl2rgb(y, info['name'])
-        self.assertEqual(rgb.shape, (3, 349, 1905))
-        self.assertLessEqual(rgb.max(), 1.0)
-        self.assertGreaterEqual(rgb.min(), 0.0)
-
-        img = (rgb*255.0).astype(np.uint8).transpose(1, 2, 0)
-        skimage.io.imsave(f'dist/{info['name']}_test_truth.png', img)
+        print(f"test_lbl2rgb needs visual verification.")
+        for datafetch in [fetch_muufl, fetch_trento]:
+            casi, lidar, truth, info = datafetch()
+            train_label, test_label = split_spmatrix(truth, 100)
+            self.generate_lbl2rgb(train_label, info, subset='train')
+            self.generate_lbl2rgb(test_label, info, subset='test')
+        for datafetch in [fetch_houston2013]:
+            casi, lidar, train_label, test_label, info = datafetch()
+            self.generate_lbl2rgb(train_label, info, subset='train')
+            self.generate_lbl2rgb(test_label, info, subset='test')
         
 
 if __name__ == '__main__':
