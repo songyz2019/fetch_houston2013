@@ -25,9 +25,10 @@ jobs:
     - run: uv sync --frozen
     - run: uv build
     - run: uv publish
-      env:
-        UV_PUBLISH_USERNAME: ${{secrets.UV_PUBLISH_USERNAME}}
-        UV_PUBLISH_PASSWORD: ${{secrets.UV_PUBLISH_PASSWORD}}
+    # We use trusted publisher of PyPI
+    #   env:
+    #     UV_PUBLISH_USERNAME: ${{secrets.UV_PUBLISH_USERNAME}}
+    #     UV_PUBLISH_PASSWORD: ${{secrets.UV_PUBLISH_PASSWORD}}
 
 
     - name: Upload wheels
