@@ -20,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.13', '3.12', '3.9'] # an oldest, two newest
 
     steps:
     - uses: actions/checkout@v4
@@ -37,5 +37,5 @@ jobs:
     - name: Upload wheels
       uses: actions/upload-artifact@v4
       with:
-        name: wheels
+        name: wheels-${{matrix.python-version}}
         path: dist/*
