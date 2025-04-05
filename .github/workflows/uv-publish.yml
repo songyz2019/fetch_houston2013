@@ -2,6 +2,8 @@ name: uv-publish
 
 on:
     workflow_dispatch:
+    release:
+      types: [published]
 
         
 permissions:
