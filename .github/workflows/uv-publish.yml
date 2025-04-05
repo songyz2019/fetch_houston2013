@@ -1,0 +1,37 @@
+name: uv-test
+
+on:
+    workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: astral-sh/setup-uv@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - run: uv sync --frozen
+    - run: uv build
+    - run: uv publish
+      env:
+        UV_PUBLISH_USERNAME: ${{secrets.UV_PUBLISH_USERNAME}}
+        UV_PUBLISH_PASSWORD: ${{secrets.UV_PUBLISH_PASSWORD}}
+
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheels-${{matrix.python-version}}
+        path: dist/*
