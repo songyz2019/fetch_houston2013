@@ -1,4 +1,4 @@
-name: uv-test
+name: uv-publish
 
 on:
     workflow_dispatch:
