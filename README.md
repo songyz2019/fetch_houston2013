@@ -8,11 +8,10 @@
 
 
 
-Download and load Houston 2013 Dataset, Trento dataset and Muufl dataset easily and swiftly.
-
-- Automatically download and cache all needed files
-- Verify checksums to avoid data poisoning
-- Use sparse matrix to representing ground truth, less memory usage and easier iteration
+Download and load Houston 2013 Dataset, Trento dataset and Muufl dataset easily and swiftly. fetch_houston2013 is:
+1. A fast houston2013 muufl and trento dataset fetcher that automatically downloads all data
+2. A ready-to-use torch dataloader for houston2013 muufl and trento dataset
+3. A toolbox for visualizing the datasets
 
 ![screenshot](screenshot.jpg)
 
@@ -49,29 +48,27 @@ or directly use them for getting the value in a very fast way:
       return x_hsi, x_dsm, label
 ```
 
-## Help
-- [GitHub Wiki](https://github.com/songyz2019/fetch_houston2013/wiki)
-
-## Build
-1. Install [uv](https://docs.astral.sh/uv/)
-2. Run `uv build` to build `.whl`
-3. Run `uv run python tests/test.py` to test the package.
-
-## Experimental Features
-### torch
-Since 0.6, a new torch dataset is under testing, the API is under designing, you can try it:
+### torch (experimental)
 ```python
 from fetch_houston2013.torch import Houston2013, Trento, Muufl
-dataset = Muufl(subset='train')
+dataset = Muufl(subset='train', patch_size=11)
 x_h, x_l, y, extras = dataset[0]
 ```
-### util.lbl2rgb
-Since 0.6, a label-to-rgb util is introduced, it's under development
+### util.lbl2rgb (experimental)
 ```python
 from fetch_houston2013.util import lbl2rgb
 hsi, dsm, train_label, test_label, info = fetch_houston2013()
 lbl2rgb(test_label, 'houston2013')
 ```
+
+## Help
+- [GitHub Wiki](https://github.com/songyz2019/fetch_houston2013/wiki)
+- [Examples in tests/test.py](tests/test.py)
+
+## Build
+1. Install [uv](https://docs.astral.sh/uv/)
+2. Run `uv build` to build `.whl`
+3. Run `uv run python tests/test.py` to test the package.
 
 ## Star History
 
