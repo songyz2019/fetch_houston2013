@@ -69,6 +69,8 @@ exclude_lines = [
 
 [dependency-groups]
 dev = [
-    "torch>=1.10.0",
-    "torchvision>=0.11.0",
+    "torch==1.9.1; python_version <= '3.8'",
+    "torch>=2.5.1; python_version > '3.8'",
+    "torchvision==0.10.1; python_version <= '3.8'",
+    "torchvision>=0.20.1; python_version > '3.8'",
 ]
