@@ -97,6 +97,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "hsi2rgb" },
     { name = "torch" },
     { name = "torchvision" },
 ]
@@ -112,6 +113,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "hsi2rgb", specifier = ">=0.1.1" },
     { name = "torch", specifier = ">=2.5.1" },
     { name = "torchvision", specifier = ">=0.20.1" },
 ]
@@ -132,6 +134,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/45/d8/8425e6ba5fcec61a1d16e41b1b71d2bf9344f1fe48012c2b48b9620feae5/fsspec-2025.3.2.tar.gz", hash = "sha256:e52c77ef398680bbd6a98c0e628fbc469491282981209907bbc8aea76a04fdc6", size = 299281 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/44/4b/e0cfc1a6f17e990f3e64b7d941ddc4acdc7b19d6edd51abf495f32b1a9e4/fsspec-2025.3.2-py3-none-any.whl", hash = "sha256:2daf8dc3d1dfa65b6aa37748d112773a7a08416f6c70d96b264c96476ecaf711", size = 194435 },
+]
+
+[[package]]
+name = "hsi2rgb"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "numpy", version = "2.2.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/32/8f/5581dd82c4f6c8480d9169d7ba16150c43e0a48a2c41d3617f878d593107/hsi2rgb-0.1.1.tar.gz", hash = "sha256:28aaa25be78f8d251919438f01104a48c4e9e128c89f06b9b2206e9baf8f2af7", size = 99032 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a4/43/6b4517718f50977dbb35f519a32e1a61b6a463357020db0a8cfee1e81cc2/hsi2rgb-0.1.1-py3-none-any.whl", hash = "sha256:4bb759c1293cf773231f623ef76ca6fc81fb0e4bf8af01143bfcf74b13832b4e", size = 8035 },
 ]
 
 [[package]]

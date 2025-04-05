@@ -91,7 +91,8 @@ def fetch_muufl(datahome=None, download_if_missing=True):
         'n_class': d.sceneLabels.Materials_Type.size,
         'width': hsi.shape[1],
         'height': hsi.shape[0],
-        'label_dict': dict(enumerate(d.sceneLabels.Materials_Type, start=1))
+        'label_dict': dict(enumerate(d.sceneLabels.Materials_Type, start=1)),
+        'wavelength': np.linspace(350, 1000, hsi.shape[-1]), # TODO: find the real wavelength
     }
 
     return hsi.transpose(2,0,1), lidar.transpose(2,0,1), truth, info

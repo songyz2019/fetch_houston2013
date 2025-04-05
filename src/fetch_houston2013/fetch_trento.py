@@ -107,7 +107,8 @@ def fetch_trento(datahome=None, download_if_missing=True):
             4: "Woods",
             5: "Vineyard",
             6: "Roads"
-        }
+        },
+        'wavelength': np.linspace(350, 1000, hsi.shape[-1]), # TODO: find the real wavelength
     }
 
     return hsi.transpose(2,0,1), lidar.transpose(2,0,1), truth, info

@@ -11,6 +11,7 @@ from fetch_houston2013.util import lbl2rgb
 import torch
 from torch.utils.data import DataLoader
 from itertools import product
+from hsi2rgb import hsi2rgb
 
 
 class Test(unittest.TestCase):
@@ -56,45 +57,85 @@ class Test(unittest.TestCase):
 
     def test_fetch_houston2013(self):
         casi, lidar, train_truth, test_truth, info = fetch_houston2013()
-
+        H, W = 349, 1905
+        C_H, C_L = 144, 1
         self.assertEqual(train_truth.data.max(), info['n_class'])
         self.assertEqual(train_truth.data.min(), 1)
         self.assertEqual(train_truth.todense().min(), 0)
         self.assertEqual(test_truth.data.max(), info['n_class'])
         self.assertEqual(test_truth.data.min(), 1)
         self.assertEqual(test_truth.todense().min(), 0)
-
-        self.assertEqual(casi.shape, (144, 349, 1905))
-        self.assertEqual(lidar.shape, (1, 349, 1905))
-        self.assertEqual(train_truth.shape, (349, 1905))
-        self.assertEqual(test_truth.shape, (349, 1905))
+        self.assertEqual(casi.shape, (C_H, H, W))
+        self.assertEqual(lidar.shape, (C_L, H, W))
+        self.assertEqual(train_truth.shape, (H, W))
+        self.assertEqual(test_truth.shape, (H, W))
         self.assertEqual(info['n_band_hsi'], 144)
         self.assertEqual(info['n_band_lidar'], 1)
         self.assertEqual(info['n_class'], 15)
-        self.assertEqual(info['width'], 1905)
-        self.assertEqual(info['height'], 349)
+        self.assertEqual(info['width'], W)
+        self.assertEqual(info['height'], H)
         self.assertEqual(len(info['label_dict']), 15)
         self.assertEqual(info['wavelength'].shape, (144,))
         self.assertEqual(info['wavelength'][0], 364.000000)
         self.assertEqual(info['wavelength'][-1], 1046.099976)
+        self.assertEqual(len(info['wavelength']), C_H)
+
+        hsi = casi.astype(np.float32)
+        hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
+        rgb = hsi2rgb(hsi, wavelength=info['wavelength'], input_format='CHW', output_format='HWC')
+        skimage.io.imsave(f"dist/{info['name']}_hsi.png", (rgb * 255.0).astype(np.uint8))
+
+        dsm = lidar[0, :, :]
+        dsm_img = (dsm - dsm.min()) / (dsm.max() - dsm.min()) * 255.0
+        skimage.io.imsave(f"dist/{info['name']}_dsm.png", dsm_img.astype(np.uint8))
 
     def test_fetch_muufl(self):
         casi, lidar, truth, info = fetch_muufl()
         train_label, test_label = split_spmatrix(truth, 20)
-        self.assertEqual(casi.shape, (64, 325, 220))
-        self.assertEqual(lidar.shape, (2, 325, 220))
-        self.assertEqual(truth.shape, (325, 220))
-        self.assertEqual(train_label.shape, (325, 220))
-        self.assertEqual(test_label.shape, (325, 220))
+        H, W = 325, 220
+        C_H, C_L = 64, 2
+        self.assertEqual(casi.shape, (C_H, H, W))
+        self.assertEqual(lidar.shape, (C_L, H, W))
+        self.assertEqual(truth.shape, (H, W))
+        self.assertEqual(train_label.shape, (H, W))
+        self.assertEqual(test_label.shape, (H, W))
+        self.assertEqual(info['n_band_lidar'], C_L)
+        self.assertEqual(info['n_band_casi'], C_H)
+        self.assertEqual(len(info['wavelength']), C_H)
+
+        hsi = casi.astype(np.float32)
+        hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
+        rgb = hsi2rgb(hsi, wavelength=info['wavelength'], input_format='CHW', output_format='HWC')
+        skimage.io.imsave(f"dist/{info['name']}_hsi.png", (rgb * 255.0).astype(np.uint8))
+
+        dsm = lidar[0, :, :]
+        dsm_img = (dsm - dsm.min()) / (dsm.max() - dsm.min()) * 255.0
+        skimage.io.imsave(f"dist/{info['name']}_dsm.png", dsm_img.astype(np.uint8))
 
     def test_fetch_trento(self):
         casi, lidar, truth, info = fetch_trento()
         train_label, test_label = split_spmatrix(truth, 20)
-        self.assertEqual(casi.shape, (63, 166, 600))
-        self.assertEqual(lidar.shape, (2, 166, 600))
-        self.assertEqual(truth.shape, (166, 600))
-        self.assertEqual(train_label.shape, (166, 600))
-        self.assertEqual(test_label.shape, (166, 600))
+
+        H, W = 166, 600
+        C_H, C_L = 63, 2
+        self.assertEqual(casi.shape, (C_H, H, W))
+        self.assertEqual(lidar.shape, (C_L, H, W))
+        self.assertEqual(info['n_band_casi'], C_H)
+        self.assertEqual(len(info['wavelength']), C_H)
+        self.assertEqual(info['n_band_lidar'], C_L)
+
+        self.assertEqual(truth.shape, (H, W))
+        self.assertEqual(train_label.shape, (H, W))
+        self.assertEqual(test_label.shape, (H, W))
+
+        hsi = casi.astype(np.float32)
+        hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
+        rgb = hsi2rgb(hsi, wavelength=info['wavelength'], input_format='CHW', output_format='HWC')
+        skimage.io.imsave(f"dist/{info['name']}_hsi.png", (rgb * 255.0).astype(np.uint8))
+
+        dsm = lidar[0, :, :]
+        dsm_img = (dsm - dsm.min()) / (dsm.max() - dsm.min()) * 255.0
+        skimage.io.imsave(f"dist/{info['name']}_dsm.png", dsm_img.astype(np.uint8))
 
     def test_torch_datasets(self):
         for Dataset, subset, patch_size in product([Houston2013, Muufl, Trento], ['train', 'test', 'full'], [1, 5, 10, 11]):
