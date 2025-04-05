@@ -28,10 +28,6 @@ jobs:
     - run: uv build
     - run: uv publish
     # We use trusted publisher of PyPI, not token needed
-    #   env:
-    #     UV_PUBLISH_USERNAME: ${{secrets.UV_PUBLISH_USERNAME}}
-    #     UV_PUBLISH_PASSWORD: ${{secrets.UV_PUBLISH_PASSWORD}}
-
 
     - name: Upload wheels
       uses: actions/upload-artifact@v4

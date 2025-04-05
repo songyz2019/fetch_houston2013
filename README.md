@@ -49,12 +49,10 @@ or directly use them for getting the value in a very fast way:
 2. We download dataset from official website and pastbin.com. Make sure you can access these websites.
 
 ## Build
-```bash
-# install uv
-uv build
-bash load_secrets.bash
-uv publish
-```
+1. Install [uv](https://docs.astral.sh/uv/)
+2. Run `uv build` to build `.whl`
+3. Run `uv run python tests/test.py` to test the package.
+
 
 ## Experimental Features
 ### torch
