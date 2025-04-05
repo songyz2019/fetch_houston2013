@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fetch-houston2013"
-dynamic = ["version"]
+version = "0.7.1.dev1+b6bc0a3"
 description = 'Download and load Houston 2013 Dataset'
 readme = "README.md"
 requires-python = ">=3.9"

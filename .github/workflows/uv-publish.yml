@@ -24,6 +24,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
+    - name: bump version of pyproject.toml
+      run: bash etc/bump_version.sh
+
     - run: uv sync --frozen
     - run: uv build
     - run: uv publish
