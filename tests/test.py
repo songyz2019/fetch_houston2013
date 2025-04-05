@@ -2,13 +2,40 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix
-from fetch_houston2013.fetch_trento import fetch_trento
+from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix, fetch_trento
+from fetch_houston2013.torch import Muufl, Houston2013, Trento
+import torch
+from torch.utils.data import DataLoader
+from itertools import product
 
 
 class Test(unittest.TestCase):
     def setUp(self):
         pass
+    
+    def torch_dataloader_test(self, dataset):
+        b = 16
+        dataset = Muufl(subset='train')
+        dataloader = DataLoader(dataset, batch_size=b, shuffle=True)
+        x_h, x_l, y, extras = next(iter(dataloader))
+        
+        n_test = 10
+        for x_h, x_l, y, extras in dataloader:
+            if torch.cuda.is_available():
+                x_h, x_l, y = x_h.cuda(), x_l.cuda(), y.cuda()
+            self.assertIsInstance(x_h, torch.Tensor)
+            self.assertIsInstance(x_l, torch.Tensor)
+            self.assertIsInstance(y, torch.Tensor)
+            self.assertEqual(x_h.shape, torch.Size([b, 64,dataset.patch_size,dataset.patch_size]))
+            self.assertEqual(x_l.shape, torch.Size([b, 1,dataset.patch_size,dataset.patch_size]))
+            self.assertEqual(y.shape, torch.Size([b, dataset.n_class]))
+            self.assertEqual(x_h.dtype, torch.float)
+            self.assertEqual(x_l.dtype, torch.float)
+            self.assertEqual(y.dtype, torch.float)
+            if n_test <= 0:
+                break
+            else:
+                n_test -= 1
 
     def test_fetch_houston2013(self):
         casi, lidar, train_truth, test_truth, info = fetch_houston2013()
@@ -44,29 +71,10 @@ class Test(unittest.TestCase):
         self.assertEqual(train_label.shape, (166, 600))
         self.assertEqual(test_label.shape, (166, 600))
 
-    def test_torch_dataset(self):
-        # 测试torch_dataset.py中的数据集
-        from fetch_houston2013.torch import Houston2013, Trento, Muufl
-        dataset = Houston2013(patch_radius=7, subset='train')
-        x_h, x_l, y, extras = dataset[0]
-        self.assertEqual(len(dataset), 2832)
-
-        dataset = Muufl(patch_radius=11, subset='train')
-        x_h, x_l, y, extras = dataset[0]
-        self.assertEqual(len(dataset), 220)
-
-        dataset = Trento(patch_radius=11, subset='train')
-        x_h, x_l, y, extras = dataset[0]
-        self.assertEqual(len(dataset), 120)
-
-    def test_torch_muufl(self):
-        from fetch_houston2013.torch import Muufl
-        dataset = Muufl(subset='train')
-        x_h, x_l, y, extras = dataset[0]
-        self.assertEqual(x_h.shape, (64,11,11))
-        self.assertEqual(x_l.shape, (1,11,11))
-        self.assertEqual(y.shape, (dataset.n_class, ))
-
+    def test_torch_datasets(self):
+        for Dataset, subset, patch_size in product([Houston2013, Muufl, Trento], ['train', 'test', 'full'], [1, 5, 10, 11]):
+            dataset = Dataset(subset=subset, patch_size=patch_size)
+            self.torch_dataloader_test(dataset)
 
 if __name__ == '__main__':
     unittest.main()

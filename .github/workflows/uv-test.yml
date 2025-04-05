@@ -3,8 +3,12 @@ name: uv-test
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - "README.md"
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - "README.md"
 
 permissions:
   contents: read
@@ -14,12 +18,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
+
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.12
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: ${{ matrix.python-version }}
     - uses: astral-sh/setup-uv@v5
 
     - run: uv sync
