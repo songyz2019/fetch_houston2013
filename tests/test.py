@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.assertGreaterEqual(rgb.min(), 0.0)
 
         img = (rgb*255.0).astype(np.uint8).transpose(1, 2, 0)
-        skimage.io.imsave(f'dist/{info['name']}_{subset}.png', img)
+        skimage.io.imsave(f"dist/{info['name']}_{subset}.png", img)
 
     def test_fetch_houston2013(self):
         casi, lidar, train_truth, test_truth, info = fetch_houston2013()
