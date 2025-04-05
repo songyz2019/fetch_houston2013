@@ -7,7 +7,7 @@ name = "fetch-houston2013"
 dynamic = ["version"]
 description = 'Download and load Houston 2013 Dataset'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "Apache-2.0"
 keywords = []
 authors = [
@@ -16,7 +16,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -69,8 +68,6 @@ exclude_lines = [
 
 [dependency-groups]
 dev = [
-    "torch==1.9.1; python_version <= '3.8'",
-    "torch>=2.5.1; python_version > '3.8'",
-    "torchvision==0.10.1; python_version <= '3.8'",
-    "torchvision>=0.20.1; python_version > '3.8'",
+    "torch>=2.5.1",
+    "torchvision>=0.20.1",
 ]
