@@ -62,8 +62,9 @@ lbl2rgb(test_label, 'houston2013')
 ```
 
 ## Help
-- [GitHub Wiki](https://github.com/songyz2019/fetch_houston2013/wiki)
-- [Examples in tests/test.py](tests/test.py)
+- [User Manual](https://github.com/songyz2019/fetch_houston2013/wiki/Usage)
+- [Developer Manual](https://github.com/songyz2019/fetch_houston2013/wiki/Development)
+- [Examples](tests/test.py)
 
 ## Build
 1. Install [uv](https://docs.astral.sh/uv/)
