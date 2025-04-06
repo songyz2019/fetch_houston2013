@@ -117,7 +117,7 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
     info :DataMetaInfo = {
         'name': 'houston2013',
         'full_name': 'IEEE GRSS DF Contest Houston 2013',
-        'homepage': 'https://hyperspectral.ee.uh.edu/?page_id=459',
+        'homepage': 'https://machinelearning.ee.uh.edu/?page_id=459',
         'n_channel_hsi': 144,
         'n_channel_lidar': 1,
         'n_class': 15,

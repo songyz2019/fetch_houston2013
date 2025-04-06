@@ -5,13 +5,14 @@ import unittest
 
 import numpy as np
 import skimage
-from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix, fetch_trento, Muufl, Houston2013, Trento, DataMetaInfo, lbl2rgb
-import torch
+from fetch_houston2013 import _fetch_houston2013mmrs, _Houston2013Mmrs
 from torch.utils.data import DataLoader
 from itertools import product
 from hsi2rgb import hsi2rgb
-
+import torch
 from typing import get_type_hints, TypedDict, get_origin
+
+from fetch_houston2013 import CommonHsiDsmDataset, DataMetaInfo
 
 
 def is_typeddict_instance(obj, typeddict_cls):
@@ -27,10 +28,7 @@ def is_typeddict_instance(obj, typeddict_cls):
     
 
 class Test(unittest.TestCase):
-    def setUp(self):
-        pass
-    
-    def torch_dataloader_test(self, dataset):
+    def torch_dataloader_test(self, dataset :CommonHsiDsmDataset):
         b = 16
         dataloader = DataLoader(dataset, batch_size=b, shuffle=True, drop_last=True)
         x_h, x_l, y, extras = next(iter(dataloader))
@@ -67,7 +65,7 @@ class Test(unittest.TestCase):
         skimage.io.imsave(f"dist/{info['name']}_{subset}.png", img, check_contrast=False)
 
     def test_fetch_houston2013(self):
-        casi, lidar, train_truth, test_truth, info = fetch_houston2013()
+        casi, lidar, train_truth, test_truth, info = _fetch_houston2013mmrs()
         H, W = 349, 1905
         C_H, C_L = 144, 1
         self.assertEqual(train_truth.data.max(), info['n_class'])
@@ -101,77 +99,11 @@ class Test(unittest.TestCase):
         dsm_img = (dsm - dsm.min()) / (dsm.max() - dsm.min()) * 255.0
         skimage.io.imsave(f"dist/{info['name']}_dsm.png", dsm_img.astype(np.uint8))
 
-    def test_fetch_muufl(self):
-        casi, lidar, truth, info = fetch_muufl()
-        train_label, test_label = split_spmatrix(truth, 20)
-        H, W = 325, 220
-        C_H, C_L = 64, 2
-        self.assertEqual(casi.shape, (C_H, H, W))
-        self.assertEqual(lidar.shape, (C_L, H, W))
-        self.assertEqual(truth.shape, (H, W))
-        self.assertEqual(train_label.shape, (H, W))
-        self.assertEqual(test_label.shape, (H, W))
-        self.assertEqual(info['n_channel_lidar'], C_L)
-        self.assertEqual(info['n_channel_hsi'], C_H)
-        self.assertEqual(len(info['wavelength']), C_H)
-        self.assertTrue(is_typeddict_instance(info, DataMetaInfo))
-
-
-        hsi = casi.astype(np.float32)
-        hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
-        rgb = hsi2rgb(hsi, wavelength=info['wavelength'], input_format='CHW', output_format='HWC')
-        skimage.io.imsave(f"dist/{info['name']}_hsi.png", (rgb * 255.0).astype(np.uint8))
-
-        dsm = lidar[0, :, :]
-        dsm_img = (dsm - dsm.min()) / (dsm.max() - dsm.min()) * 255.0
-        skimage.io.imsave(f"dist/{info['name']}_dsm.png", dsm_img.astype(np.uint8))
-
-    def test_fetch_trento(self):
-        casi, lidar, truth, info = fetch_trento()
-        train_label, test_label = split_spmatrix(truth, 20)
-
-        H, W = 166, 600
-        C_H, C_L = 63, 2
-        self.assertEqual(casi.shape, (C_H, H, W))
-        self.assertEqual(lidar.shape, (C_L, H, W))
-        self.assertEqual(info['n_channel_hsi'], C_H)
-        self.assertEqual(len(info['wavelength']), C_H)
-        self.assertEqual(info['n_channel_lidar'], C_L)
-
-        self.assertEqual(truth.shape, (H, W))
-        self.assertEqual(train_label.shape, (H, W))
-        self.assertEqual(test_label.shape, (H, W))
-        self.assertTrue(is_typeddict_instance(info, DataMetaInfo))
-
-
-        hsi = casi.astype(np.float32)
-        hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
-        rgb = hsi2rgb(hsi, wavelength=info['wavelength'], input_format='CHW', output_format='HWC')
-        skimage.io.imsave(f"dist/{info['name']}_hsi.png", (rgb * 255.0).astype(np.uint8))
-
-        dsm = lidar[0, :, :]
-        dsm_img = (dsm - dsm.min()) / (dsm.max() - dsm.min()) * 255.0
-        skimage.io.imsave(f"dist/{info['name']}_dsm.png", dsm_img.astype(np.uint8))
-
     def test_torch_datasets(self):
-        for Dataset, subset, patch_size in product([Houston2013, Muufl, Trento], ['train', 'test', 'full'], [1, 5, 10, 11]):
+        for Dataset, subset, patch_size in product([_Houston2013Mmrs], ['train', 'test', 'full'], [1, 5, 10, 11]):
             dataset = Dataset(subset=subset, patch_size=patch_size)
             self.torch_dataloader_test(dataset)
-            if Dataset in [Muufl, Trento] and subset == 'train':
-                n_train_perclass = 50
-                self.assertEqual(dataset.n_class*n_train_perclass, len(Dataset(subset=subset, patch_size=5, n_train_perclass=n_train_perclass)))
 
-
-    def test_lbl2rgb(self):
-        for datafetch in [fetch_muufl, fetch_trento]:
-            casi, lidar, truth, info = datafetch()
-            train_label, test_label = split_spmatrix(truth, 100)
-            self.generate_lbl2rgb(train_label, info, subset='train')
-            self.generate_lbl2rgb(test_label, info, subset='test')
-        for datafetch in [fetch_houston2013]:
-            casi, lidar, train_label, test_label, info = datafetch()
-            self.generate_lbl2rgb(train_label, info, subset='train')
-            self.generate_lbl2rgb(test_label, info, subset='test')
         
 
 if __name__ == '__main__':

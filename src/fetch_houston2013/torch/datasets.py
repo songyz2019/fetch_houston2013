@@ -1,9 +1,19 @@
-from fetch_houston2013 import fetch_houston2013, fetch_trento, fetch_muufl, split_spmatrix
+from ..core.fetch_houston2013 import fetch_houston2013
+from ..core.fetch_muufl import fetch_muufl
+from ..core.fetch_trento import fetch_trento
+from ..core._fetch_houston2013mmrs import _fetch_houston2013mmrs
+from ..util.split_spmatrix import split_spmatrix
 from .common_hsi_dsm_dataset import CommonHsiDsmDataset
 
 class Houston2013(CommonHsiDsmDataset):
     def __init__(self, subset, patch_size=5, *args, **kwargs):
         super().__init__(fetch_houston2013, subset, patch_size, *args, **kwargs)
+
+class _Houston2013Mmrs(CommonHsiDsmDataset):
+    """This is only for internal test."""
+    def __init__(self, subset, patch_size=5, *args, **kwargs):
+        super().__init__(_fetch_houston2013mmrs, subset, patch_size, *args, **kwargs)
+
 
 class Muufl(CommonHsiDsmDataset):
     """
@@ -27,4 +37,4 @@ class Trento(CommonHsiDsmDataset):
 
 
 
-__all__ = ['Houston2013', 'Muufl', 'Trento']
+__all__ = ['Houston2013', 'Muufl', 'Trento', '_Houston2013Mmrs']
