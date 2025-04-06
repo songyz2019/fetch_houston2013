@@ -12,7 +12,10 @@ import scipy.io
 
 from scipy.sparse import coo_array
 from jaxtyping import Float
-from fetch_houston2013.util.fileio import get_data_home, verify_files
+
+from ..util.fileio import get_data_home, verify_files
+from .common import DataMetaInfo
+
 
 def fetch_trento(datahome=None, download_if_missing=True):
     """
@@ -89,18 +92,18 @@ def fetch_trento(datahome=None, download_if_missing=True):
     )['mask_test']
     truth = coo_array(truth)
 
-    info = {
+    info :DataMetaInfo = {
         'name': 'trento',
         'description': 'Trento dataset',
         'version': '0.1',
         'homepage': None,
         'license': None,
-        'n_band_casi': hsi.shape[-1],
-        'n_band_lidar': lidar.shape[-1],
+        'n_channel_hsi': hsi.shape[-1],
+        'n_channel_lidar': lidar.shape[-1],
         'n_class': 6,
         'width': hsi.shape[1],
         'height': hsi.shape[0],
-        'label_dict': {
+        'label_name': {
             1: "Apple Trees",
             2: "Building",
             3: "Ground",

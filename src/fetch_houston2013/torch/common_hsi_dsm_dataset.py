@@ -7,24 +7,28 @@ import torch
 import numpy as np
 import warnings
 
+from ..core.common import DataMetaInfo
+
 class CommonHsiDsmDataset(VisionDataset):
     def __init__(self,
-                 data_fetch: Callable[[],tuple[np.ndarray,np.ndarray,coo_array,coo_array, dict]],
+                 data_fetch: Callable[[],tuple[np.ndarray,np.ndarray,coo_array,coo_array, DataMetaInfo]],
                  subset: Literal['train', 'test', 'full'], 
                  patch_size: int = 11,  # I prefer patch_radius, but patch_size is more popular and maintance two pathc_xxx is to complex...
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.subset = subset
+
         if patch_size % 2 != 1:
             warnings.warn("Non-odd patch size may cause unknown behaviors (classification pixel is at right bottom 2x2 center location). Use at your own risk.",category=UserWarning,stacklevel=2)
-
         self.patch_size = patch_size
         self.patch_radius = patch_size // 2 # if patch_size is odd, it should be (patch_size - w_center)/2, but some user will use on-odd patch size
-        
-        self.subset = subset
 
         self.HSI, self.LIDAR, train_truth, test_truth, self.INFO = data_fetch()
         self.n_class = self.INFO['n_class']
+        self.n_channel_hsi   = self.INFO['n_channel_hsi']
+        self.n_channel_lidar = self.INFO['n_channel_lidar']
+
 
         # Preprocess HSI and DSM
         pad_shape = ((0, 0), (self.patch_radius, self.patch_radius), (self.patch_radius, self.patch_radius))

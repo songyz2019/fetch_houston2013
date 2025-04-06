@@ -1,10 +1,3 @@
-import warnings
-warnings.warn(
-    "The 'torch dataset' feature is experimental and may change in future releases.",
-    category=UserWarning,
-    stacklevel=2
-)
-
 from fetch_houston2013 import fetch_houston2013, fetch_trento, fetch_muufl, split_spmatrix
 from .common_hsi_dsm_dataset import CommonHsiDsmDataset
 

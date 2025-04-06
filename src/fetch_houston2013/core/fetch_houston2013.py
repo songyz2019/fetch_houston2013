@@ -15,14 +15,15 @@ import rasterio
 from scipy.sparse import coo_array, spmatrix
 from jaxtyping import UInt16, Float32, UInt64
 
-from fetch_houston2013.util.fileio import get_data_home, verify_files, read_roi
+from ..util.fileio import get_data_home, verify_files, read_roi
+from .common import DataMetaInfo
 
 def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) -> tuple[
     UInt16[np.ndarray, '144 349 1905'],
     Float32[np.ndarray, '1 349 1905'],
     UInt64[spmatrix, '349 1905'],
     UInt64[spmatrix, '349 1905'],
-    dict
+    DataMetaInfo
 ]:
     """Load the Houston2013 data-set in scikit-learn style
 
@@ -113,16 +114,16 @@ def fetch_houston2013(datahome: Optional[str] = None, download_if_missing=True) 
     train_truth:coo_array= read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_TR.txt', (349, 1905)) # (349 1905)
     test_truth :coo_array= read_roi(FILES_PATH / '2013_IEEE_GRSS_DF_Contest_Samples_VA.txt', (349, 1905)) # (349 1905)
 
-    info = {
+    info :DataMetaInfo = {
         'name': 'houston2013',
         'full_name': 'IEEE GRSS DF Contest Houston 2013',
         'homepage': 'https://hyperspectral.ee.uh.edu/?page_id=459',
-        'n_band_hsi': 144,
-        'n_band_lidar': 1,
+        'n_channel_hsi': 144,
+        'n_channel_lidar': 1,
         'n_class': 15,
         'width': 1905,
         'height': 349,
-        'label_dict': {
+        'label_name': {
             1 : 'Healthy grass',
             2 : 'Stressed grass',
             3 : 'Synthetic grass',

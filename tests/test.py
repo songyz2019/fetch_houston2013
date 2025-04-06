@@ -5,9 +5,7 @@ import unittest
 
 import numpy as np
 import skimage
-from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix, fetch_trento
-from fetch_houston2013.torch import Muufl, Houston2013, Trento
-from fetch_houston2013.util import lbl2rgb
+from fetch_houston2013 import fetch_houston2013, fetch_muufl, split_spmatrix, fetch_trento, Muufl, Houston2013, Trento, DataMetaInfo, lbl2rgb
 import torch
 from torch.utils.data import DataLoader
 from itertools import product
@@ -69,8 +67,8 @@ class Test(unittest.TestCase):
         self.assertEqual(lidar.shape, (C_L, H, W))
         self.assertEqual(train_truth.shape, (H, W))
         self.assertEqual(test_truth.shape, (H, W))
-        self.assertEqual(info['n_band_hsi'], 144)
-        self.assertEqual(info['n_band_lidar'], 1)
+        self.assertEqual(info['n_channel_hsi'], 144)
+        self.assertEqual(info['n_channel_lidar'], 1)
         self.assertEqual(info['n_class'], 15)
         self.assertEqual(info['width'], W)
         self.assertEqual(info['height'], H)
@@ -79,6 +77,7 @@ class Test(unittest.TestCase):
         self.assertEqual(info['wavelength'][0], 364.000000)
         self.assertEqual(info['wavelength'][-1], 1046.099976)
         self.assertEqual(len(info['wavelength']), C_H)
+        self.assertIsInstance(info, DataMetaInfo)
 
         hsi = casi.astype(np.float32)
         hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
@@ -102,6 +101,7 @@ class Test(unittest.TestCase):
         self.assertEqual(info['n_band_lidar'], C_L)
         self.assertEqual(info['n_band_casi'], C_H)
         self.assertEqual(len(info['wavelength']), C_H)
+        self.assertIsInstance(info, DataMetaInfo)
 
         hsi = casi.astype(np.float32)
         hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
@@ -120,9 +120,10 @@ class Test(unittest.TestCase):
         C_H, C_L = 63, 2
         self.assertEqual(casi.shape, (C_H, H, W))
         self.assertEqual(lidar.shape, (C_L, H, W))
-        self.assertEqual(info['n_band_casi'], C_H)
+        self.assertEqual(info['n_channel_hsi'], C_H)
         self.assertEqual(len(info['wavelength']), C_H)
-        self.assertEqual(info['n_band_lidar'], C_L)
+        self.assertEqual(info['n_channel_lidar'], C_L)
+        self.assertIsInstance(info, DataMetaInfo)
 
         self.assertEqual(truth.shape, (H, W))
         self.assertEqual(train_label.shape, (H, W))
@@ -141,6 +142,10 @@ class Test(unittest.TestCase):
         for Dataset, subset, patch_size in product([Houston2013, Muufl, Trento], ['train', 'test', 'full'], [1, 5, 10, 11]):
             dataset = Dataset(subset=subset, patch_size=patch_size)
             self.torch_dataloader_test(dataset)
+            if Dataset in [Muufl, Trento] and subset == 'train':
+                n_train_perclass = 50
+                self.assertEqual(dataset.n_class*n_train_perclass, len(Dataset(subset=subset, patch_size=5, n_train_perclass=n_train_perclass)))
+
 
     def test_lbl2rgb(self):
         print(f"test_lbl2rgb needs visual verification.")

@@ -1,7 +1,6 @@
 import os
-from os.path import exists, expanduser, join
+from os.path import exists
 from pathlib import Path
-import hashlib
 from zipfile import ZipFile
 import urllib
 import urllib.request
@@ -12,7 +11,9 @@ import scipy.io
 
 from scipy.sparse import coo_array
 from jaxtyping import Float
-from fetch_houston2013.util.fileio import get_data_home, verify_files, read_roi
+from ..util.fileio import get_data_home, verify_files, read_roi
+from .common import DataMetaInfo
+
 
 def fetch_muufl(datahome=None, download_if_missing=True):
     """
@@ -80,37 +81,24 @@ def fetch_muufl(datahome=None, download_if_missing=True):
     truth[truth==-1] = 0
     truth = coo_array(truth, dtype='int')
 
-    info = {
+    info :DataMetaInfo = {
         'name': 'muufl',
         'description': 'MUUFL Gulfport dataset',
         'version': '0.1',
         'homepage': 'https://github.com/GatorSense/MUUFLGulfport',
         'license': 'MIT',
-        'n_band_casi': hsi.shape[-1],
-        'n_band_lidar': lidar.shape[-1],
+        'n_channel_hsi': hsi.shape[-1],
+        'n_channel_lidar': lidar.shape[-1],
         'n_class': d.sceneLabels.Materials_Type.size,
         'width': hsi.shape[1],
         'height': hsi.shape[0],
-        'label_dict': dict(enumerate(d.sceneLabels.Materials_Type, start=1)),
+        'label_name': dict(enumerate(d.sceneLabels.Materials_Type, start=1)),
         'wavelength': np.linspace(350, 1000, hsi.shape[-1]), # TODO: find the real wavelength
     }
 
     return hsi.transpose(2,0,1), lidar.transpose(2,0,1), truth, info
 
 
-def split_spmatrix(a, n_samples=20, seed=0x0d000721):
-    np.random.seed(seed)
-    train = coo_array(([],([],[])),a.shape, dtype='int')
-    n_class = a.data.max()
-    for cid in range(1,n_class+1):
-        N = len(a.data[a.data==cid])
-        indice = np.random.choice(N, n_samples, replace=False)
-        row = a.row[a.data==cid][indice]
-        col = a.col[a.data==cid][indice]
-        val = np.ones(len(row)) * cid
-        train += coo_array((val, (row, col)), shape=a.shape, dtype='int')
-    test = (a - train)
-    return train.tocoo(),test.tocoo()
 
 
 __all__ = ['fetch_muufl', 'split_spmatrix']
