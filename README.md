@@ -15,7 +15,7 @@ Download and load Houston 2013 Dataset, Trento dataset and Muufl dataset easily 
 
 ![screenshot](screenshot.jpg)
 
-## Usage
+## Qucik Start
 1. install this package
 ```bash
 pip install fetch-houston2013
@@ -32,7 +32,7 @@ train_label, test_label = split_spmatrix(truth, 20)
 casi, lidar, truth, info = fetch_trento()
 train_label, test_label = split_spmatrix(truth, 20)
 ```
-3. tips: train_label and test_label are [sparse matrix](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_array.html), you can either convert them to np.array easily by
+3. Tips: train_label and test_label are [sparse matrix](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_array.html), you can either convert them to np.array easily by
 ```python
 train_label=train_label.todense()
 test_label =test_label.todense()
@@ -48,18 +48,18 @@ or directly use them for getting the value in a very fast way:
       return x_hsi, x_dsm, label
 ```
 
-### torch (experimental)
+### torch
+A standard ready-to-use Torch vison dataset.
 ```python
 from fetch_houston2013 import Houston2013, Trento, Muufl
 dataset = Muufl(subset='train', patch_size=11)
 x_h, x_l, y, extras = dataset[0]
 ```
-### util.lbl2rgb (experimental)
-```python
-from fetch_houston2013 import lbl2rgb
-hsi, dsm, train_label, test_label, info = fetch_houston2013()
-lbl2rgb(test_label, 'houston2013')
-```
+### utils
+1. lbl2rgb: convert the label dataset to rgb image
+2. read_roi: read exported `.txt` file of ENVI roi to sparse matrix
+3. split_spmatrix: split a sparse to get the train dataset and test dataset
+
 
 ## Help
 - [User Manual](https://github.com/songyz2019/fetch_houston2013/wiki/Usage)
