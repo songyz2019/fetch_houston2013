@@ -50,13 +50,13 @@ or directly use them for getting the value in a very fast way:
 
 ### torch (experimental)
 ```python
-from fetch_houston2013.torch import Houston2013, Trento, Muufl
+from fetch_houston2013 import Houston2013, Trento, Muufl
 dataset = Muufl(subset='train', patch_size=11)
 x_h, x_l, y, extras = dataset[0]
 ```
 ### util.lbl2rgb (experimental)
 ```python
-from fetch_houston2013.util import lbl2rgb
+from fetch_houston2013 import lbl2rgb
 hsi, dsm, train_label, test_label, info = fetch_houston2013()
 lbl2rgb(test_label, 'houston2013')
 ```
@@ -66,10 +66,6 @@ lbl2rgb(test_label, 'houston2013')
 - [Developer Manual](https://github.com/songyz2019/fetch_houston2013/wiki/Development)
 - [Examples](tests/test.py)
 
-## Build
-1. Install [uv](https://docs.astral.sh/uv/)
-2. Run `uv build` to build `.whl`
-3. Run `uv run python tests/test.py` to test the package.
 
 ## Star History
 
