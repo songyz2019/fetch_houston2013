@@ -83,7 +83,7 @@ def fetch_muufl(datahome=None, download_if_missing=True):
 
     info :DataMetaInfo = {
         'name': 'muufl',
-        'description': 'MUUFL Gulfport dataset',
+        'full_name': 'MUUFL Gulfport dataset',
         'version': '0.1',
         'homepage': 'https://github.com/GatorSense/MUUFLGulfport',
         'license': 'MIT',

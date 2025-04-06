@@ -11,6 +11,20 @@ from torch.utils.data import DataLoader
 from itertools import product
 from hsi2rgb import hsi2rgb
 
+from typing import get_type_hints, TypedDict, get_origin
+
+
+def is_typeddict_instance(obj, typeddict_cls):
+    if not isinstance(obj, dict):
+        return False
+    type_hints = get_type_hints(typeddict_cls)
+    for key, expected_type in type_hints.items():
+        if key not in obj: # do not check value: isinstance() argument 2 cannot be a parameterized generic
+            print(f"Key '{key}' is missing or has incorrect type.")
+            return False
+    return True
+
+    
 
 class Test(unittest.TestCase):
     def setUp(self):
@@ -51,7 +65,7 @@ class Test(unittest.TestCase):
         self.assertGreaterEqual(rgb.min(), 0.0)
 
         img = (rgb*255.0).astype(np.uint8).transpose(1, 2, 0)
-        skimage.io.imsave(f"dist/{info['name']}_{subset}.png", img)
+        skimage.io.imsave(f"dist/{info['name']}_{subset}.png", img, check_contrast=False)
 
     def test_fetch_houston2013(self):
         casi, lidar, train_truth, test_truth, info = fetch_houston2013()
@@ -72,12 +86,12 @@ class Test(unittest.TestCase):
         self.assertEqual(info['n_class'], 15)
         self.assertEqual(info['width'], W)
         self.assertEqual(info['height'], H)
-        self.assertEqual(len(info['label_dict']), 15)
+        self.assertEqual(len(info['label_name']), 15)
         self.assertEqual(info['wavelength'].shape, (144,))
         self.assertEqual(info['wavelength'][0], 364.000000)
         self.assertEqual(info['wavelength'][-1], 1046.099976)
         self.assertEqual(len(info['wavelength']), C_H)
-        self.assertIsInstance(info, DataMetaInfo)
+        self.assertTrue(is_typeddict_instance(info, DataMetaInfo))
 
         hsi = casi.astype(np.float32)
         hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
@@ -98,10 +112,11 @@ class Test(unittest.TestCase):
         self.assertEqual(truth.shape, (H, W))
         self.assertEqual(train_label.shape, (H, W))
         self.assertEqual(test_label.shape, (H, W))
-        self.assertEqual(info['n_band_lidar'], C_L)
-        self.assertEqual(info['n_band_casi'], C_H)
+        self.assertEqual(info['n_channel_lidar'], C_L)
+        self.assertEqual(info['n_channel_hsi'], C_H)
         self.assertEqual(len(info['wavelength']), C_H)
-        self.assertIsInstance(info, DataMetaInfo)
+        self.assertTrue(is_typeddict_instance(info, DataMetaInfo))
+
 
         hsi = casi.astype(np.float32)
         hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
@@ -123,11 +138,12 @@ class Test(unittest.TestCase):
         self.assertEqual(info['n_channel_hsi'], C_H)
         self.assertEqual(len(info['wavelength']), C_H)
         self.assertEqual(info['n_channel_lidar'], C_L)
-        self.assertIsInstance(info, DataMetaInfo)
 
         self.assertEqual(truth.shape, (H, W))
         self.assertEqual(train_label.shape, (H, W))
         self.assertEqual(test_label.shape, (H, W))
+        self.assertTrue(is_typeddict_instance(info, DataMetaInfo))
+
 
         hsi = casi.astype(np.float32)
         hsi = (hsi - hsi.min()) / (hsi.max() - hsi.min())
@@ -148,7 +164,6 @@ class Test(unittest.TestCase):
 
 
     def test_lbl2rgb(self):
-        print(f"test_lbl2rgb needs visual verification.")
         for datafetch in [fetch_muufl, fetch_trento]:
             casi, lidar, truth, info = datafetch()
             train_label, test_label = split_spmatrix(truth, 100)

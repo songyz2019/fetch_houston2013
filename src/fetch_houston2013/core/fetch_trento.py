@@ -94,10 +94,10 @@ def fetch_trento(datahome=None, download_if_missing=True):
 
     info :DataMetaInfo = {
         'name': 'trento',
-        'description': 'Trento dataset',
+        'full_name': 'Trento',
         'version': '0.1',
-        'homepage': None,
-        'license': None,
+        'homepage': '',
+        'license': '',
         'n_channel_hsi': hsi.shape[-1],
         'n_channel_lidar': lidar.shape[-1],
         'n_class': 6,
