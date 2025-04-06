@@ -33,8 +33,21 @@ class CommonHsiDsmDataset(VisionDataset):
 
         # Preprocess HSI and DSM
         pad_shape = ((0, 0), (self.patch_radius, self.patch_radius), (self.patch_radius, self.patch_radius))
-        self.hsi = np.pad(self.HSI,   pad_shape, 'symmetric')
-        self.dsm = np.pad(self.LIDAR, pad_shape, 'symmetric')
+
+        self.hsi = self.HSI
+        self.dsm = self.LIDAR
+        self.dsm = (self.dsm - self.dsm.min()) / (self.dsm.max() - self.dsm.min())
+
+        # If we have einops, just need
+        # min_value = reduce(x, '... c h w -> ... c 1 1', 'min')
+        # max_value = reduce(x, '... c h w -> ... c 1 1', 'max')
+        # return (x-min_value) / (max_value-min_value)
+        min_hsi = self.hsi.min(axis=-1, keepdims=True).min(axis=-2, keepdims=True)
+        max_hsi = self.hsi.max(axis=-1, keepdims=True).max(axis=-2, keepdims=True)
+        self.hsi = (self.hsi - min_hsi) / (max_hsi - min_hsi)
+        
+        self.hsi = np.pad(self.hsi,   pad_shape, 'symmetric')
+        self.dsm = np.pad(self.dsm, pad_shape, 'symmetric')
 
         # Preprocess truth
         self.truth = {
