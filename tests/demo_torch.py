@@ -1,4 +1,4 @@
-# Start your researh in the joint classification of HSI and DSM data in 50 lines of code
+# understand the code of joint classification of HSI and DSM data in 50 lines
 import torch
 from torch import argmax
 from torch.nn import Sequential, LazyConv2d, ReLU, LazyBatchNorm2d, Module, LazyLinear
@@ -7,9 +7,8 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from fetch_houston2013 import Houston2013, Trento, Muufl
 
-class Model(Module):
+class MyModel(Module):
     def __init__(self, n_class):
-        super(Model, self).__init__()
         self.conv_hsi = Sequential(
             LazyConv2d(64, kernel_size=3), ReLU(), LazyBatchNorm2d(),
             LazyConv2d(16, kernel_size=3)
@@ -27,7 +26,7 @@ class Model(Module):
 if __name__=='__main__':
     # Train
     trainset = Houston2013(subset='train', patch_size=5)
-    model = Model(n_class=trainset.INFO['n_class'])
+    model = MyModel(n_class=trainset.INFO['n_class'])
     optimizer = Adam(model.parameters(), lr=0.005)
     for epoch in range(10):
         for hsi,dsm,lbl,info in DataLoader(trainset, batch_size=64, shuffle=True, drop_last=True):
