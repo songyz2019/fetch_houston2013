@@ -15,7 +15,7 @@ Download and load Houston 2013 Dataset, Trento dataset and Muufl dataset easily 
 
 ![screenshot](screenshot.jpg)
 
-## Qucik Start
+## Quick Start
 1. install this package
 ```bash
 pip install fetch-houston2013
