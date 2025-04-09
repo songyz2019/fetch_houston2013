@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from itertools import product
 from hsi2rgb import hsi2rgb
 
-from typing import get_type_hints, TypedDict, get_origin
+from typing import get_type_hints
 
 
 def is_typeddict_instance(obj, typeddict_cls):

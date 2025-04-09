@@ -64,7 +64,8 @@ x_h, x_l, y, extras = dataset[0]
 ## Help
 - [User Manual](https://github.com/songyz2019/fetch_houston2013/wiki/Usage)
 - [Developer Manual](https://github.com/songyz2019/fetch_houston2013/wiki/Development)
-- [Examples](tests/test.py)
+- [Test cases](tests/test.py)
+- [PyTorch Demo: train your model in 50 lines of code](tests/demo_torch.py)
 
 
 ## Star History
